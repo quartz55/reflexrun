@@ -3,7 +3,7 @@ require "base/internal/ui/reflexrunHUD/rrMapTriggers"
 
 rr_Timer =
   {
-    firstStart = 1
+    firstStart = true
   };
 
 registerWidget("rr_Timer");
@@ -36,8 +36,8 @@ end
 -------------------------------------------------------------------------
 -------------------------------------------------------------------------
 
-local prevPlHealth
-local prevPlArmor
+local prevPlHealth, prevPlArmor
+local startZone, endzone
 local currMap
 local maxStamps = 5
 
@@ -67,17 +67,17 @@ local function stampTime(time)
   rr_TimeStamp:newStamp(time)
   rr_TimesList:updateList(timeStamps, time)
 
-  consolePrint("+------------+")
-  consolePrint("| Last time  |")
-  consolePrint("+------------+")
-  consolePrint("|  " .. formatTime(time) .. "  |")
-  consolePrint("+------------+")
-  consolePrint("| Top times  |")
-  consolePrint("+-+----------+")
-  for i, v in pairs(timeStamps) do
-    consolePrint("|" .. i .. "| " .. formatTime(v) .. " |")
-  end
-  consolePrint("+-+----------+")
+  -- consolePrint("+------------+")
+  -- consolePrint("| Last time  |")
+  -- consolePrint("+------------+")
+  -- consolePrint("|  " .. formatTime(time) .. "  |")
+  -- consolePrint("+------------+")
+  -- consolePrint("| Top times  |")
+  -- consolePrint("+-+----------+")
+  -- for i, v in pairs(timeStamps) do
+  --   consolePrint("|" .. i .. "| " .. formatTime(v) .. " |")
+  -- end
+  -- consolePrint("+-+----------+")
 end
 
 
@@ -89,7 +89,6 @@ function rr_Timer:draw()
 
   local localPl = getLocalPlayer()
   local specPl = getPlayer()
-  specPl.startZone = false
 
   -- Reset times on load
   if currMap ~= world.mapName or currMap == nil then
@@ -153,45 +152,39 @@ function rr_Timer:draw()
   -------------------------------------------------------------------------
   -- Timer --
   -------------------------------------------------------------------------
-  if rr_Timer.firstStart == 1 then
+  if rr_Timer.firstStart then
     timer = Timer.new(deltaTimeRaw)
-    rr_Timer.firstStart = 0
+    rr_Timer.firstStart = false
     prevPlHealth = specPl.health
     prevPlArmor = specPl.armor
+    startZone = false
   end
 
   -- Start timer
-  if (specPl.health - prevPlHealth) > 0
-    and (specPl.health - prevPlHealth) <= 15
+  if startZone
+    and not checkPlayerPosition(specPl, world.mapName, "begin")
   then
     timer.timer = 0.0
     timer.counting = true
-    prevPlHealth = specPl.health
-    prevPlArmor = specPl.armor
     for i=1,PHGPHUD_TIMERSOUNDS_VOLUME,1 do
       playSound("internal/ui/reflexrunHUD/sfx/DefragStart");
     end
   end
 
   -- Reset timer
-  -- if timer.counting
-  --   and (specPl.armor - prevPlArmor) <= 5
-  --   and (specPl.armor - prevPlArmor) > 0
-  -- then
-  --   timer.timer = 0.0
-  --   timer.counting = false
-  --   prevPlHealth = specPl.health
-  --   prevPlArmor = specPl.armor
-  -- end
+  if timer.counting
+    and checkPlayerPosition(localPl, world.mapName, "begin")
+  then
+    timer.timer = 0.0
+    timer.counting = false
+  end
 
   -- End timer
   if timer.counting
-    and (specPl.armor - prevPlArmor) <= 15
-    and (specPl.armor - prevPlArmor) > 0
+  and checkPlayerPosition(specPl, world.mapName, "end")
+    and not endZone
   then
     timer.counting = false
-    prevPlHealth = specPl.health
-    prevPlArmor = specPl.armor
     stampTime(timer.timer)
     for i=1,PHGPHUD_TIMERSOUNDS_VOLUME,1 do
       playSound("internal/ui/reflexrunHUD/sfx/DefragStop");
@@ -200,6 +193,8 @@ function rr_Timer:draw()
 
   prevPlHealth = specPl.health
   prevPlArmor = specPl.armor
+  startZone = checkPlayerPosition(specPl, world.mapName, "begin")
+  endZone = checkPlayerPosition(specPl, world.mapName, "end")
 
   local currTime = formatTime(0)
   if timer ~= nil then

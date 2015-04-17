@@ -50,7 +50,7 @@ function rr_SpeedMeter:draw()
   nvgText(speedFontX, speedFontY, speedText)
 
   nvgFillColor(speedFontColor);
-  nvgText(speedFontX, speedFontY-50, "|X| " .. specPl.position.x .. " |Y| " .. specPl.position.y .. " |Z| " .. specPl.position.z)
+  nvgText(speedFontX, speedFontY-50, "|X| " .. math.floor(specPl.position.x) .. " |Y| " .. math.floor(specPl.position.y) .. " |Z| " .. math.floor(specPl.position.z))
 end
 
 function rr_SpeedMeter:settings()
