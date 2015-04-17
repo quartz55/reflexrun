@@ -1,0 +1,8 @@
+REFLEXRUN CHANGELOG -*- mode: org -*-
+
+* Version v0.85
+** UPS meter now shows correct horizontal velocity (doesn't show Z anymore)
+** Timer triggers were changed:
+*** Green health pickups now always start a new timer even if another is running already
+*** Green armor shards now always stop and stamp a timer
+*** Mega isn't used for anything anymore
