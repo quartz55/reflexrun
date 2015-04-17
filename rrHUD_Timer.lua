@@ -1,4 +1,5 @@
 require "base/internal/ui/reflexrunHUD/phgphudcore"
+require "base/internal/ui/reflexrunHUD/rrMapTriggers"
 
 rr_Timer =
   {
@@ -6,54 +7,6 @@ rr_Timer =
   };
 
 registerWidget("rr_Timer");
-
--------------------------------------------------------------------------
--- Map Triggers
--------------------------------------------------------------------------
-
-local mapTriggers =
-  {
-    [1] =
-      {
-        name = "RRbldf2";
-        ["begin"] =
-          {
-            x1 = -480;
-            y1 = -95;
-            z1 = 2658;
-            x2 = -120;
-            y2 = -40;
-            z2 = 2880;
-          };
-        ["end"] =
-          {
-            x1 = -480;
-            y1 = -95;
-            z1 = 2658;
-            x2 = -120;
-            y2 = -40;
-            z2 = 2880;
-          };
-      };
-  };
-
-local function checkPlayerPosition(player, mapName, zone)
-  for i, v in pairs(mapTriggers) do
-    if mapName == v.name then
-      if player.position.x >= v[zone].x1 and player.position.x <= v[zone].x2
-        and player.position.y >= v[zone].y1 and player.position.y <= v[zone].y2
-        and player.position.z >= v[zone].z1 and player.position.z <= v[zone].z2
-      then
-        return true
-      else return false
-      end
-    end
-  end
-  return false
-end
-
--------------------------------------------------------------------------
--------------------------------------------------------------------------
 
 -------------------------------------------------------------------------
 -- Timer Class
