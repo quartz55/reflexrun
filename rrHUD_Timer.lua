@@ -36,7 +36,6 @@ end
 -------------------------------------------------------------------------
 -------------------------------------------------------------------------
 
-local prevPlHealth, prevPlArmor
 local startZone, endzone
 local currMap
 local maxStamps = 5
@@ -155,8 +154,6 @@ function rr_Timer:draw()
   if rr_Timer.firstStart then
     timer = Timer.new(deltaTimeRaw)
     rr_Timer.firstStart = false
-    prevPlHealth = specPl.health
-    prevPlArmor = specPl.armor
     startZone = false
   end
 
@@ -191,8 +188,6 @@ function rr_Timer:draw()
     end
   end
 
-  prevPlHealth = specPl.health
-  prevPlArmor = specPl.armor
   startZone = checkPlayerPosition(specPl, world.mapName, "begin")
   endZone = checkPlayerPosition(specPl, world.mapName, "end")
 
