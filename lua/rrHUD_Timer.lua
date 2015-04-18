@@ -77,6 +77,7 @@ function rr_Timer:draw()
   local localPl = getLocalPlayer()
   local specPl = getPlayer()
 
+
   -- Reset times on load
   if currMap ~= world.mapName or currMap == nil then
     resetTimes()

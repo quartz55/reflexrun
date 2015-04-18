@@ -24,9 +24,14 @@ function rr_Tutorial:draw()
   local localPl = getLocalPlayer()
   local specPl = getPlayer()
 
-  local tutorialSVG = "internal/ui/reflexrunHUD/icons/tabtutorial";
+  local tutorialSVG = "internal/ui/reflexrunHUD/icons/Reflexruntutorial";
   local svgX = 0
   local svgY = 0
+
+  if showScores then
+    nvgFillColor(PHGPHUD_WHITE_COLOR);
+    nvgSvg(tutorialSVG, svgX, svgX, svgSize);
+  end
 
   -- if showScores then
   --   if not animating then
