@@ -1,4 +1,3 @@
-
 require "base/internal/ui/reflexrunHUD/phgphudcore"
 
 rr_NewRecord =
@@ -7,7 +6,7 @@ rr_NewRecord =
 
 registerWidget("rr_NewRecord");
 
-local tween = require("base/internal/ui/reflexrunHUD/tween")
+local tween = require "base/internal/ui/reflexrunHUD/lua/tween"
 
 local tVals = {}
 

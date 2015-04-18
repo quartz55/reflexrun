@@ -6,7 +6,7 @@ rr_Tutorial =
 
 registerWidget("rr_Tutorial");
 
-tween = require("base/internal/ui/reflexrunHUD/tween")
+local tween = require "base/internal/ui/reflexrunHUD/lua/tween"
 
 local svgSize = 500
 

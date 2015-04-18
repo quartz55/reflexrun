@@ -1,4 +1,3 @@
-
 require "base/internal/ui/reflexrunHUD/phgphudcore"
 
 rr_TimeStamp =
@@ -8,7 +7,7 @@ rr_TimeStamp =
 
 registerWidget("rr_TimeStamp");
 
-local tween = require "base/internal/ui/reflexrunHUD/tween"
+local tween = require "base/internal/ui/reflexrunHUD/lua/tween"
 
 local tVals = {}
 

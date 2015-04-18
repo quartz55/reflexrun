@@ -1,5 +1,5 @@
 require "base/internal/ui/reflexrunHUD/phgphudcore"
-require "base/internal/ui/reflexrunHUD/rrMapTriggers"
+require "base/internal/ui/reflexrunHUD/lua/rrMapTriggers"
 
 rr_Timer =
   {
