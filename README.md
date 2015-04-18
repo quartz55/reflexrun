@@ -7,9 +7,9 @@ CREATED BY QUARTZ AND ZEV
 
 * ##### Installing the HUD/Mode
 
-  To *install* Reflexrun, just extract the zip folder into the Reflex “ui” folder.
+  To *install* Reflexrun, just extract the contents of the zip into a folder called "reflexrunHUD" in the Reflex “ui” folder.
   
-  It will look somewhat like this: **Reflexfps -> base -> internal -> ui -> reflexrun**
+  It will look somewhat like this: **Reflexfps -> base -> internal -> ui -> reflexrunHUD**
 
 * ##### Installing the Maps
 
