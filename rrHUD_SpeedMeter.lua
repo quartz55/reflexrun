@@ -13,6 +13,8 @@ function rr_SpeedMeter:draw()
   local localPl = getLocalPlayer()
   local specPl = getPlayer()
 
+  local showPos = false
+
   local barWidth = viewport.width/2
   local barHeight = 20
   local barRight = 0
@@ -49,8 +51,9 @@ function rr_SpeedMeter:draw()
   nvgFillColor(speedFontColor);
   nvgText(speedFontX, speedFontY, speedText)
 
-  nvgFillColor(speedFontColor);
-  nvgText(speedFontX, speedFontY-50, "|X| " .. math.floor(specPl.position.x) .. " |Y| " .. math.floor(specPl.position.y) .. " |Z| " .. math.floor(specPl.position.z))
+  if showPos then
+    nvgText(speedFontX, speedFontY-50, "|X| " .. math.floor(specPl.position.x) .. " |Y| " .. math.floor(specPl.position.y) .. " |Z| " .. math.floor(specPl.position.z))
+  end
 end
 
 function rr_SpeedMeter:settings()
