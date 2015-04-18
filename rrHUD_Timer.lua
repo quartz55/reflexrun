@@ -52,7 +52,7 @@ end
 local function stampTime(time)
 
   if time < timeStamps[1] then
-    rr_NewRecord:new()
+    -- rr_NewRecord:new()
   end
 
   for i, v in pairs(timeStamps) do
@@ -63,20 +63,8 @@ local function stampTime(time)
     end
   end
 
-  rr_TimeStamp:newStamp(time)
+  -- rr_TimeStamp:newStamp(time)
   rr_TimesList:updateList(timeStamps, time)
-
-  -- consolePrint("+------------+")
-  -- consolePrint("| Last time  |")
-  -- consolePrint("+------------+")
-  -- consolePrint("|  " .. formatTime(time) .. "  |")
-  -- consolePrint("+------------+")
-  -- consolePrint("| Top times  |")
-  -- consolePrint("+-+----------+")
-  -- for i, v in pairs(timeStamps) do
-  --   consolePrint("|" .. i .. "| " .. formatTime(v) .. " |")
-  -- end
-  -- consolePrint("+-+----------+")
 end
 
 
@@ -249,12 +237,12 @@ function rr_Timer:draw()
   nvgFillColor(fontColor);
   nvgText(timerFontX, timerFontY, currTime)
 
-  nvgFillColor(fontColor);
-  if checkPlayerPosition(specPl, world.mapName, "begin") then
-    nvgText(timerFontX, timerFontY-100, "IN")
-  else
-    nvgText(timerFontX, timerFontY-100, "OUT")
-  end
+  -- nvgFillColor(fontColor);
+  -- if checkPlayerPosition(specPl, world.mapName, "begin") then
+  --   nvgText(timerFontX, timerFontY-100, "IN")
+  -- else
+  --   nvgText(timerFontX, timerFontY-100, "OUT")
+  -- end
 
   -- Draw logo icon
   nvgFillColor(logoIconColor);

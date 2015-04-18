@@ -28,27 +28,27 @@ function rr_Tutorial:draw()
   local svgX = 0
   local svgY = 0
 
-  if showScores then
-    if not animating then
-      animating = true
+  -- if showScores then
+  --   if not animating then
+  --     animating = true
 
-      alphaT = tween.new(1-tVals.alpha+0.01, tVals, {alpha = 1}, 'outQuint')
-      yT = tween.new(1-(65-tVals.y)/65+0.01, tVals, {y = 0}, 'outQuint')
-    end
-  elseif animating then
-    animating = false
+  --     alphaT = tween.new(1-tVals.alpha+0.01, tVals, {alpha = 1}, 'outQuint')
+  --     yT = tween.new(1-(65-tVals.y)/65+0.01, tVals, {y = 0}, 'outQuint')
+  --   end
+  -- elseif animating then
+  --   animating = false
 
-    alphaT = tween.new(tVals.alpha*0.5+0.01, tVals, {alpha = 0}, 'inQuint')
-    yT = tween.new(0.5-(tVals.y/65)*0.5+0.01, tVals, {y = 65}, 'inQuint')
-  end
+  --   alphaT = tween.new(tVals.alpha*0.5+0.01, tVals, {alpha = 0}, 'inQuint')
+  --   yT = tween.new(0.5-(tVals.y/65)*0.5+0.01, tVals, {y = 65}, 'inQuint')
+  -- end
 
-  if alphaT ~= null then alphaT:update(deltaTimeRaw) end
-  if yT ~= null then yT:update(deltaTimeRaw) end
+  -- if alphaT ~= null then alphaT:update(deltaTimeRaw) end
+  -- if yT ~= null then yT:update(deltaTimeRaw) end
 
-  if tVals.alpha <= 0 then return end
+  -- if tVals.alpha <= 0 then return end
 
-  nvgFillColor(ColorA(PHGPHUD_WHITE_COLOR, 255*tVals.alpha));
-  nvgSvg(tutorialSVG, svgX, svgX+tVals.y, svgSize);
+  -- nvgFillColor(ColorA(PHGPHUD_WHITE_COLOR, 255*tVals.alpha));
+  -- nvgSvg(tutorialSVG, svgX, svgX+tVals.y, svgSize);
 
 end
 

@@ -2,7 +2,7 @@
 -- Map Triggers
 -------------------------------------------------------------------------
 
-mapTriggers =
+local mapTriggers =
   {
     ["RRreflexjump"] =
       {
@@ -23,28 +23,6 @@ mapTriggers =
             x2 = 3627;
             y2 = 1390;
             z2 = -1200;
-          };
-      };
-
-    ["RRbldf2"] =
-      {
-        ["begin"] =
-          {
-            x1 = -480;
-            y1 = -95;
-            z1 = 2658;
-            x2 = -120;
-            y2 = -40;
-            z2 = 2880;
-          };
-        ["end"] =
-          {
-            x1 = -996;
-            y1 = 560;
-            z1 = 1983;
-            x2 = -730;
-            y2 = 606;
-            z2 = 2176;
           };
       };
     ["RRbldf1"] =
@@ -68,14 +46,62 @@ mapTriggers =
             z2 = 830;
           };
       };
+    ["RRbldf2"] =
+      {
+        ["begin"] =
+          {
+            x1 = -480;
+            y1 = -100;
+            z1 = 2658;
+            x2 = -120;
+            y2 = -40;
+            z2 = 2880;
+          };
+        ["end"] =
+          {
+            x1 = -996;
+            y1 = 560;
+            z1 = 1983;
+            x2 = -730;
+            y2 = 606;
+            z2 = 2176;
+          };
+      };
+    ["RRbldf3"] =
+      {
+        ["begin"] =
+          {
+            x1 = -68;
+            y1 = 60;
+            z1 = -200;
+            x2 = 68;
+            y2 = 120;
+            z2 = -59;
+          };
+        ["end"] =
+          {
+            x1 = 2677;
+            y1 = 576;
+            z1 = 132;
+            x2 = 2944;
+            y2 = 630;
+            z2 = -391;
+          };
+      };
   };
+
+local function inBetween(val, a, b)
+  local min = math.min(a,b)
+  local max = math.max(a,b)
+  return (val >= min and val <= max)
+end
 
 function checkPlayerPosition(player, mapName, zone)
   for i, v in pairs(mapTriggers) do
-    if mapName == i then
-      if player.position.x >= v[zone].x1 and player.position.x <= v[zone].x2
-        and player.position.y >= v[zone].y1 and player.position.y <= v[zone].y2
-        and player.position.z >= v[zone].z1 and player.position.z <= v[zone].z2
+    if string.lower(mapName) == string.lower(i) then
+      if inBetween(player.position.x, v[zone].x1, v[zone].x2)
+        and inBetween(player.position.y, v[zone].y1, v[zone].y2)
+        and inBetween(player.position.z, v[zone].z1, v[zone].z2)
       then
         return true
       else return false
