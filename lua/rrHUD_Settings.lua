@@ -16,5 +16,5 @@ function reflexrun:draw()
   -- rr_NewRecord:settings()
   rr_SpecPlayer:settings()
   rr_MovementKeys:settings()
-  -- rr_Tutorial:settings()
+  rr_Tutorial:settings()
 end
