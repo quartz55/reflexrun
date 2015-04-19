@@ -13,15 +13,16 @@ function rr_ArmorBar:draw()
   local localPl = getLocalPlayer()
   local specPl = getPlayer()
 
-  local barWidth = viewport.width/2
+  local barWidth = viewport.width/2*0.95
   local barHeight = 20
-  local barRight = 0
-  local barLeft = barWidth
+  local barRight = barWidth
+  local barLeft = 0
   local barTop = -barHeight
   local barBottom = 0
 
   local armorPercentage = specPl.armor/200
   local fillWidth = barWidth*armorPercentage
+  local fillWidth2 = fillWidth-2*(20/math.tan(0.913))
 
   local barColors = {}
   barColors[0] = ColorA(PHGPHUD_GREEN_COLOR, 135)
@@ -31,13 +32,21 @@ function rr_ArmorBar:draw()
   local barColor = barColors[specPl.armorProtection]
   local strokeColor = ColorA(barColor, 255)
 
+  drawTrapezoid({x = barLeft, y = barBottom},
+    {bottomWidth = fillWidth, topWidth = fillWidth2, height = barHeight},
+    {fillFunc = function ()
+       nvgFillColor(barColor); nvgFill()
+    end, strokeFunc = function ()
+       nvgStrokeColor(strokeColor); nvgStroke()
+  end}, "right")
+
   -- Draw frame
-  nvgBeginPath();
-  nvgRect(barRight, barBottom, fillWidth, -barHeight);
-  nvgFillColor(barColor);
-  nvgFill();
-  nvgStrokeColor(strokeColor);
-  nvgStroke();
+  -- nvgBeginPath();
+  -- nvgRect(barRight, barBottom, fillWidth, -barHeight);
+  -- nvgFillColor(barColor);
+  -- nvgFill();
+  -- nvgStrokeColor(strokeColor);
+  -- nvgStroke();
 
 end
 

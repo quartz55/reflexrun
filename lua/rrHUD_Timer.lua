@@ -87,6 +87,7 @@ function rr_Timer:draw()
 
   -- Sizes and positions
   local frameWidth = viewport.width
+  local frameWidth2 = frameWidth*0.95
   local frameHeight = PHGPHUD_BARS_HEIGHT
 
   local frameTop = -frameHeight
@@ -97,7 +98,7 @@ function rr_Timer:draw()
   ------- Icons
   local mapIcon = "internal/ui/reflexrunHUD/icons/Map";
   local mapIconSize = frameHeight*0.3
-  local mapIconX = mapIconSize + 20
+  local mapIconX = (frameWidth-frameWidth2)/2+mapIconSize + 20
   local mapIconY = -frameHeight/2
 
   local alertIcon = "internal/ui/reflexrunHUD/icons/Megaalert";
@@ -112,7 +113,7 @@ function rr_Timer:draw()
 
   local logoIcon = "internal/ui/reflexrunHUD/icons/reflexrun";
   local logoIconSize = frameHeight*2.5
-  local logoIconX = frameWidth-logoIconSize-30
+  local logoIconX = frameWidth-(frameWidth-frameWidth2)/2-logoIconSize-30
   local logoIconY = -frameHeight/2
 
   ------- Fonts
@@ -188,13 +189,27 @@ function rr_Timer:draw()
   -------------------------------------------------------------------------
   -------------------------------------------------------------------------
 
+  -- testing
+  local trapzFill = function ()
+    -- nvgFillColor(ColorA(PHGPHUD_BLACK_COLOR, 235))
+    nvgFillLinearGradient(frameLeft, frameTop, frameLeft, frameBottom, ColorA(PHGPHUD_BLACK_COLOR, 225), ColorA(PHGPHUD_BLACK_COLOR, 245))
+    nvgFill()
+  end
+  local trapzStroke = function ()
+    nvgStrokeLinearGradient(frameLeft, frameTop, frameLeft, frameBottom, PHGPHUD_BLUE_COLOR, ColorA(PHGPHUD_BLUE_COLOR, 0))
+    nvgStroke()
+  end
+  drawTrapezoid({x = frameLeft, y = frameBot},
+    {bottomWidth=frameWidth, topWidth = frameWidth2, height = frameHeight},
+    {fillFunc = trapzFill, strokeFunc = trapzStroke})
+
   -- Draw frame
-  nvgBeginPath();
-  nvgRect(frameLeft, frameTop, frameWidth, frameHeight);
-  nvgFillColor(frameColor);
-  nvgFill();
-  nvgStrokeLinearGradient(frameLeft, frameTop, frameLeft, frameHeight, strokeColor, ColorA(strokeColor, 0));
-  nvgStroke();
+  -- nvgBeginPath();
+  -- nvgRect(frameLeft, frameTop, frameWidth, frameHeight);
+  -- nvgFillColor(frameColor);
+  -- nvgFill();
+  -- nvgStrokeLinearGradient(frameLeft, frameTop, frameLeft, frameHeight, strokeColor, ColorA(strokeColor, 0));
+  -- nvgStroke();
 
   -- Draw map icon
   nvgFillColor(mapIconColor);
@@ -207,26 +222,6 @@ function rr_Timer:draw()
   nvgFillColor(fontColor);
   nvgText(mapFontX, mapFontY, world.mapName)
 
-  -- Ready alert
-  -- if not timer.counting and not specPl.hasMega then
-  --   -- Draw alert text
-  --   nvgFontSize(alertFontSize);
-  --   nvgFontFace(PHGPHUD_FONT_REGULAR);
-  --   nvgTextAlign(NVG_ALIGN_LEFT, NVG_ALIGN_MIDDLE);
-
-  --   local size = nvgTextWidth("Pick Mega to ready")
-  --   nvgFillColor(ColorA(alertIconColor, 100));
-  --   nvgFontBlur(3)
-  --   nvgText(alertFontX-size/2, alertFontY, "Pick Mega to ready")
-  --   nvgFillColor(alertIconColor);
-  --   nvgFontBlur(0)
-  --   nvgText(alertFontX-size/2, alertFontY, "Pick Mega to ready")
-
-  --   -- Draw alert icon
-  --   nvgFillColor(alertIconColor);
-  --   nvgSvg(alertIcon, alertIconX-size/2, alertIconY, alertIconSize);
-  -- end
-
   -- Draw timer icon
   nvgFillColor(timerIconColor);
   nvgSvg(timerIcon, timerIconX, timerIconY, timerIconSize);
@@ -237,13 +232,6 @@ function rr_Timer:draw()
   nvgTextAlign(NVG_ALIGN_LEFT, NVG_ALIGN_MIDDLE);
   nvgFillColor(fontColor);
   nvgText(timerFontX, timerFontY, currTime)
-
-  -- nvgFillColor(fontColor);
-  -- if checkPlayerPosition(specPl, world.mapName, "begin") then
-  --   nvgText(timerFontX, timerFontY-100, "IN")
-  -- else
-  --   nvgText(timerFontX, timerFontY-100, "OUT")
-  -- end
 
   -- Draw logo icon
   nvgFillColor(logoIconColor);

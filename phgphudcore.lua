@@ -7,29 +7,9 @@ PHGPHUD_TIMER_MAX = 5999.99
 -- Util functions --
 --------------------
 
+
 function ColorA(color, alpha)
 	return Color(color.r, color.g, color.b, alpha);
-end
-
-function formatTime(timeS)
-	local t = {};
-
-  local time = timeS * 1000
-
-	t.seconds = math.floor(time/1000);
-	t.minutes = math.floor(t.seconds / 60);
-	t.seconds = t.seconds - t.minutes * 60;
-  t.mili = math.floor((time - (t.seconds * 1000) - (t.minutes * 60 * 1000))/10)
-
-  local mins = t.minutes
-  if mins < 10 then mins = "0"..mins end
-  local secs = t.seconds
-  if secs < 10 then secs = "0"..secs end
-  local milis = t.mili
-  if milis < 10 then milis = "0"..milis end
-
-  local fullText = mins .. ":" .. secs .. ":" .. milis
-	return fullText;
 end
 
 --------------------
@@ -72,3 +52,73 @@ PHGPHUD_FONT_BOLD = "SourceSansPro-Bold";
 --------------------------
 --------------------------
 
+
+--------------------
+-- Mixc functions --
+--------------------
+
+function drawTrapezoid(position, size, color, side)
+  -- set vars
+  ---- position
+  local x = position.x or 0
+  local y = position.y or 0
+  ---- size
+  local botW = size.bottomWidth or 200
+  local topW = size.topWidth or 100
+  local h = size.height or 50
+  ---- color
+  local fillFunc = color.fillFunc or function() nvgFillColor(PHGPHUD_BLUE_COLOR); nvgFill() end
+  local strokeFunc = color.strokeFunc or function() end
+  local sides = side or "full"
+
+  -- helpers
+  local topX = x+(botW-topW)/2
+
+  -- Draw path
+  nvgBeginPath()
+  ---- Draw trapezoid
+  nvgMoveTo(x, y)
+  if sides == "full" or sides == "left" then
+    nvgLineTo(topX, y-h)
+  else nvgLineTo(x, y-h)
+  end
+  if sides == "full" or sides == "right" then
+    nvgLineTo(topX+topW, y-h)
+  else nvgLineTo(x+botW, y-h)
+  end
+  nvgLineTo(x+botW, y)
+  nvgLineTo(x, y)
+  fillFunc()
+  strokeFunc()
+  if stroke then nvgStroke() end
+
+  nvgBeginPath();
+  nvgRect(topX, y-h, topW, h);
+  nvgStrokeLinearGradient(x, y-h, x, y, PHGPHUD_BLUE_COLOR, ColorA(PHGPHUD_BLUE_COLOR, 0));
+  nvgStroke();
+
+end
+
+function formatTime(timeS)
+  local t = {};
+
+  local time = timeS * 1000
+
+  t.seconds = math.floor(time/1000);
+  t.minutes = math.floor(t.seconds / 60);
+  t.seconds = t.seconds - t.minutes * 60;
+  t.mili = math.floor((time - (t.seconds * 1000) - (t.minutes * 60 * 1000))/10)
+
+  local mins = t.minutes
+  if mins < 10 then mins = "0"..mins end
+  local secs = t.seconds
+  if secs < 10 then secs = "0"..secs end
+  local milis = t.mili
+  if milis < 10 then milis = "0"..milis end
+
+  local fullText = mins .. ":" .. secs .. ":" .. milis
+  return fullText;
+end
+
+--------------------
+--------------------
