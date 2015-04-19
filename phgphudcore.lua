@@ -57,7 +57,7 @@ PHGPHUD_FONT_BOLD = "SourceSansPro-Bold";
 -- Mixc functions --
 --------------------
 
-function drawTrapezoid(position, size, color, side)
+function drawTrapezoid(position, size, side)
   -- set vars
   ---- position
   local x = position.x or 0
@@ -66,10 +66,7 @@ function drawTrapezoid(position, size, color, side)
   local botW = size.bottomWidth or 200
   local topW = size.topWidth or 100
   local h = size.height or 50
-  ---- color
-  local fillFunc = color.fillFunc or function() nvgFillColor(PHGPHUD_BLUE_COLOR); nvgFill() end
-  local strokeFunc = color.strokeFunc or function() end
-  local sides = side or "full"
+  side = side or "full"
 
   -- helpers
   local topX = x+(botW-topW)/2
@@ -78,25 +75,16 @@ function drawTrapezoid(position, size, color, side)
   nvgBeginPath()
   ---- Draw trapezoid
   nvgMoveTo(x, y)
-  if sides == "full" or sides == "left" then
+  if side == "full" or side == "left" then
     nvgLineTo(topX, y-h)
   else nvgLineTo(x, y-h)
   end
-  if sides == "full" or sides == "right" then
+  if side == "full" or side == "right" then
     nvgLineTo(topX+topW, y-h)
   else nvgLineTo(x+botW, y-h)
   end
   nvgLineTo(x+botW, y)
   nvgLineTo(x, y)
-  fillFunc()
-  strokeFunc()
-  if stroke then nvgStroke() end
-
-  nvgBeginPath();
-  nvgRect(topX, y-h, topW, h);
-  nvgStrokeLinearGradient(x, y-h, x, y, PHGPHUD_BLUE_COLOR, ColorA(PHGPHUD_BLUE_COLOR, 0));
-  nvgStroke();
-
 end
 
 function formatTime(timeS)

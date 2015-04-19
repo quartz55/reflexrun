@@ -15,23 +15,37 @@ function rr_SpecPlayer:draw()
   local localPl = getLocalPlayer()
   local specPl = getPlayer()
 
-  local barWidth = viewport.width/2
-  local barHeight = 15
-  local barRight = barWidth
-  local barLeft = 0
-  local barTop = 0
-  local barBottom = 0
+  local barHeight = 40
 
   local specIcon = "internal/ui/reflexrunHUD/icons/visibility1";
-  local specIconSize = barHeight
+  local specIconSize = barHeight*0.35
   local specIconX = specIconSize + 20
   local specIconY = barHeight/2
-  local specIconColor = PHGPHUD_WHITE_COLOR
+  local specIconColor = PHGPHUD_BLUE_COLOR
 
-  local specFontSize = barHeight*2
+  local specFontSize = barHeight*0.8
   local specFontX = specIconX + specIconSize + 10
   local specFontY = barHeight/2
   local specFontColor = PHGPHUD_WHITE_COLOR
+
+  local trapWidth = 300
+  local trapHeight = barHeight
+  local triLength = trapHeight/math.tan(0.913)
+  local trapWidth2 = trapWidth-2*triLength
+
+  -- Draw background trapezoid
+  nvgScale(1, -1)
+  drawTrapezoid({x = 0, y = 0},
+    {bottomWidth = trapWidth, topWidth = trapWidth2, height = trapHeight}, "right")
+    nvgFillLinearGradient(0, -trapHeight, 0, 0, ColorA(PHGPHUD_BLACK_COLOR, 225), ColorA(PHGPHUD_BLACK_COLOR, 245))
+  nvgFill()
+  nvgStrokeLinearGradient(0, -trapHeight, 0, 0, PHGPHUD_BLUE_COLOR, ColorA(PHGPHUD_BLUE_COLOR, 0))
+  nvgStroke()
+  nvgBeginPath()
+  nvgRect(0, 0, trapWidth-triLength, -trapHeight)
+  nvgStrokeLinearGradient(0, -trapHeight, 0, 0, PHGPHUD_BLUE_COLOR, ColorA(PHGPHUD_BLUE_COLOR, 0))
+  nvgStroke()
+  nvgScale(1, -1)
 
   -- Draw spec icon
   nvgFillColor(specIconColor);
@@ -43,6 +57,7 @@ function rr_SpecPlayer:draw()
   nvgTextAlign(NVG_ALIGN_LEFT, NVG_ALIGN_MIDDLE);
   nvgFillColor(specFontColor);
 
+  nvgScissor(0, 0, trapWidth-triLength, trapHeight)
   nvgText(specFontX, specFontY, specPl.name)
 
 end
@@ -50,6 +65,6 @@ end
 function rr_SpecPlayer:settings()
   consolePerformCommand("ui_show_widget rr_SpecPlayer")
   consolePerformCommand("ui_set_widget_anchor rr_SpecPlayer -1 -1")
-  consolePerformCommand("ui_set_widget_offset rr_SpecPlayer 0 65")
+  consolePerformCommand("ui_set_widget_offset rr_SpecPlayer 0 0")
   consolePerformCommand("ui_set_widget_scale rr_SpecPlayer 1")
 end

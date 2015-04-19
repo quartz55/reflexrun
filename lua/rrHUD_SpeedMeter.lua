@@ -24,7 +24,7 @@ function rr_SpeedMeter:draw()
 
   local speedIcon = "internal/ui/reflexrunHUD/icons/ups"
   local speedIconSize = barHeight
-  local speedIconX = speedIconSize + 20
+  local speedIconX = speedIconSize
   local speedIconY = -barHeight/2
 
   local speedFontSize = barHeight*2
@@ -59,6 +59,6 @@ end
 function rr_SpeedMeter:settings()
   consolePerformCommand("ui_show_widget rr_SpeedMeter")
   consolePerformCommand("ui_set_widget_anchor rr_SpeedMeter -1 1")
-  consolePerformCommand("ui_set_widget_offset rr_SpeedMeter -1 " .. -PHGPHUD_BARS_HEIGHT-40)
+  consolePerformCommand("ui_set_widget_offset rr_SpeedMeter 50 " .. -PHGPHUD_BARS_HEIGHT-40)
   consolePerformCommand("ui_set_widget_scale rr_SpeedMeter 1")
 end

@@ -17,39 +17,59 @@ local function drawList(list)
 
   local labelSize = 30
   local timerSize = 40
-  local timerSpacing = 10
-
   local frameX = 0
 
+  -- get text length
   nvgFontSize(timerSize);
   nvgFontFace(PHGPHUD_FONT_BOLD);
   nvgTextAlign(NVG_ALIGN_CENTER, NVG_ALIGN_TOP);
+
   local frameWidth = nvgTextWidth("00:00:00") + 20
-  local frameHeight = timerSize+10
+  local frameHeight = timerSize+20
+
+  local trapWidth2 = (maxTimers+3)*frameHeight
+  local trapHeight = frameWidth
+  local trapWidth = trapWidth2+2*(trapHeight/math.tan(0.913))
 
   local textX = frameWidth/2
-  local textY = -#localList/2*(frameHeight+timerSpacing)
+  local textY = -trapWidth2/2
 
+
+  -- Draw background trapezoid
+  nvgRotate(math.pi/2)
+  drawTrapezoid({x = -trapWidth/2, y = 0},
+    {bottomWidth = trapWidth, topWidth = trapWidth2, height = trapHeight}, "full")
+    nvgFillLinearGradient(0, -frameHeight, 0, 0, ColorA(PHGPHUD_BLACK_COLOR, 225), ColorA(PHGPHUD_BLACK_COLOR, 245))
+  nvgFill()
+  nvgStrokeLinearGradient(0, -frameHeight, 0, 0, PHGPHUD_BLUE_COLOR, ColorA(PHGPHUD_BLUE_COLOR, 0))
+  nvgStroke()
+  nvgRotate(-math.pi/2)
 
   -- Draw run records
+  nvgBeginPath()
+  nvgRect(0, textY, frameWidth, frameHeight, 5)
+  nvgFillColor(PHGPHUD_BLUE_COLOR)
+  nvgStrokeLinearGradient(frameWidth, 0, 0, 0, PHGPHUD_BLUE_COLOR, ColorA(PHGPHUD_BLUE_COLOR, 0))
+  nvgStroke()
   nvgFontSize(labelSize);
   nvgFontFace(PHGPHUD_FONT_REGULAR);
-  nvgTextAlign(NVG_ALIGN_CENTER, NVG_ALIGN_TOP);
+  nvgTextAlign(NVG_ALIGN_CENTER, NVG_ALIGN_MIDDLE);
+  nvgFillColor(PHGPHUD_BLUE_COLOR);
+  nvgFontBlur(0)
+  nvgText(textX, textY+frameHeight/2, "Run Records")
 
-  nvgFillColor(PHGPHUD_WHITE_COLOR);
-  nvgText(textX, textY, "Run Records")
+  textY = textY + frameHeight
 
-  textY = textY + labelSize + timerSpacing
-
+  -- Draw records
   for i, v in pairs(list) do
 
     if i > maxTimers then break end
 
     nvgBeginPath()
+    nvgRect(frameX, textY, frameWidth, frameHeight, 5)
     nvgFillColor(PHGPHUD_BLUE_COLOR)
-    nvgRoundedRect(frameX, textY, frameWidth, frameHeight, 5)
     if i == 1 then nvgFill() end
-    nvgStrokeColor(PHGPHUD_WHITE_COLOR)
+    nvgStrokeLinearGradient(frameWidth, 0, 0, 0, PHGPHUD_BLUE_COLOR, ColorA(PHGPHUD_BLUE_COLOR, 0))
     nvgStroke()
 
     nvgFontSize(timerSize);
@@ -57,30 +77,33 @@ local function drawList(list)
     nvgTextAlign(NVG_ALIGN_CENTER, NVG_ALIGN_MIDDLE);
 
     local timerText = formatTime(v)
-    nvgFillColor(PHGPHUD_BLACK_COLOR);
-    nvgText(textX, textY+frameHeight/2+1, timerText)
     nvgFillColor(PHGPHUD_WHITE_COLOR);
     nvgText(textX, textY+frameHeight/2, timerText)
 
-    textY = textY + frameHeight + timerSpacing
+    textY = textY + frameHeight
   end
 
-  -- Draw prevrun records
+  -- Draw prevrun
+  ---- BG
+  nvgBeginPath()
+  nvgRect(0, textY, frameWidth, frameHeight, 5)
+  nvgFillColor(PHGPHUD_BLUE_COLOR)
+  nvgStrokeLinearGradient(frameWidth, 0, 0, 0, PHGPHUD_BLUE_COLOR, ColorA(PHGPHUD_BLUE_COLOR, 0))
+
+  ---- Text
   nvgFontSize(labelSize);
   nvgFontFace(PHGPHUD_FONT_REGULAR);
-  nvgTextAlign(NVG_ALIGN_CENTER, NVG_ALIGN_TOP);
+  nvgTextAlign(NVG_ALIGN_CENTER, NVG_ALIGN_MIDDLE);
+  nvgFillColor(PHGPHUD_BLUE_COLOR);
+  nvgFontBlur(0)
+  nvgText(textX, textY+frameHeight/2, "Previous Run")
 
-  nvgFillColor(PHGPHUD_WHITE_COLOR);
-  nvgText(textX, textY, "Previous Run")
-
-  textY = textY + labelSize + timerSpacing
-
-  if prevTime == null then return end
+  textY = textY + frameHeight
 
   nvgBeginPath()
   nvgFillColor(PHGPHUD_BLUE_COLOR)
-  nvgRoundedRect(frameX, textY, frameWidth, frameHeight, 5)
-  nvgStrokeColor(PHGPHUD_WHITE_COLOR)
+  nvgRect(frameX, textY, frameWidth, frameHeight, 5)
+  nvgStrokeLinearGradient(frameWidth, 0, 0, 0, PHGPHUD_BLUE_COLOR, ColorA(PHGPHUD_BLUE_COLOR, 0))
   nvgStroke()
 
   nvgFontSize(timerSize);
@@ -117,6 +140,6 @@ end
 function rr_TimesList:settings()
   consolePerformCommand("ui_show_widget rr_TimesList")
   consolePerformCommand("ui_set_widget_anchor rr_TimesList -1 0")
-  consolePerformCommand("ui_set_widget_offset rr_TimesList 30 0")
+  consolePerformCommand("ui_set_widget_offset rr_TimesList 0 0")
   consolePerformCommand("ui_set_widget_scale rr_TimesList 1")
 end

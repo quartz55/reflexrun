@@ -190,18 +190,16 @@ function rr_Timer:draw()
   -------------------------------------------------------------------------
 
   -- testing
-  local trapzFill = function ()
-    -- nvgFillColor(ColorA(PHGPHUD_BLACK_COLOR, 235))
+  drawTrapezoid({x = frameLeft, y = frameBot},
+    {bottomWidth=frameWidth, topWidth = frameWidth2, height = frameHeight}, "full")
     nvgFillLinearGradient(frameLeft, frameTop, frameLeft, frameBottom, ColorA(PHGPHUD_BLACK_COLOR, 225), ColorA(PHGPHUD_BLACK_COLOR, 245))
     nvgFill()
-  end
-  local trapzStroke = function ()
     nvgStrokeLinearGradient(frameLeft, frameTop, frameLeft, frameBottom, PHGPHUD_BLUE_COLOR, ColorA(PHGPHUD_BLUE_COLOR, 0))
     nvgStroke()
-  end
-  drawTrapezoid({x = frameLeft, y = frameBot},
-    {bottomWidth=frameWidth, topWidth = frameWidth2, height = frameHeight},
-    {fillFunc = trapzFill, strokeFunc = trapzStroke})
+    nvgBeginPath()
+    nvgRect(frameLeft+(frameWidth-frameWidth2)/2, frameTop, frameWidth2, frameHeight)
+    nvgStrokeLinearGradient(frameLeft, frameTop, frameLeft, frameBottom, PHGPHUD_BLUE_COLOR, ColorA(PHGPHUD_BLUE_COLOR, 0))
+    nvgStroke()
 
   -- Draw frame
   -- nvgBeginPath();

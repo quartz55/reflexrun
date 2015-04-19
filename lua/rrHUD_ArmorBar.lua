@@ -33,12 +33,11 @@ function rr_ArmorBar:draw()
   local strokeColor = ColorA(barColor, 255)
 
   drawTrapezoid({x = barLeft, y = barBottom},
-    {bottomWidth = fillWidth, topWidth = fillWidth2, height = barHeight},
-    {fillFunc = function ()
-       nvgFillColor(barColor); nvgFill()
-    end, strokeFunc = function ()
-       nvgStrokeColor(strokeColor); nvgStroke()
-  end}, "right")
+    {bottomWidth = fillWidth, topWidth = fillWidth2, height = barHeight}, "right")
+  nvgFillColor(barColor)
+  nvgFill()
+  nvgStrokeColor(strokeColor)
+  nvgStroke()
 
   -- Draw frame
   -- nvgBeginPath();

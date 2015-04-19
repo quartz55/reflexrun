@@ -24,26 +24,15 @@ function rr_HealthBar:draw()
   local fillWidth = barWidth*healthPercentage
   local fillWidth2 = fillWidth-2*(20/math.tan(0.913))
 
-  local barColor
-  if specPl.hasMega then barColor = ColorA(PHGPHUD_BLUE_COLOR, 135)
-  else barColor = ColorA(PHGPHUD_GREEN_COLOR, 135)
-  end
+  local barColor = ColorA(PHGPHUD_BLUE_COLOR, 135)
   local strokeColor = ColorA(barColor, 255)
 
   drawTrapezoid({x = barRight, y = barBottom},
-    {bottomWidth = -fillWidth, topWidth = -fillWidth2, height = barHeight},
-    {fillFunc = function ()
-       nvgFillColor(barColor); nvgFill()
-    end, strokeFunc = function ()
-       nvgStrokeColor(strokeColor); nvgStroke()
-  end}, "right")
-  -- Draw frame
-  -- nvgBeginPath();
-  -- nvgRect(barRight, barBottom, -fillWidth, -barHeight);
-  -- nvgFillColor(barColor);
-  -- nvgFill();
-  -- nvgStrokeColor(strokeColor);
-  -- nvgStroke();
+    {bottomWidth = -fillWidth, topWidth = -fillWidth2, height = barHeight}, "right")
+  nvgFillColor(barColor)
+  nvgFill()
+  nvgStrokeColor(strokeColor)
+  nvgStroke()
 end
 
 function rr_HealthBar:settings()
