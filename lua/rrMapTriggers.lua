@@ -172,6 +172,27 @@ local mapTriggers =
             z2 = -4483;
           };
       };
+    ["rrZenTower"] =
+      {
+        ["begin"] =
+          {
+            x1 = -224;
+            y1 = 3464;
+            z1 = 3639;
+            x2 = 21;
+            y2 = 3515;
+            z2 = 3560;
+          };
+        ["end"] =
+          {
+            x1 = -240;
+            y1 = 337;
+            z1 = 223;
+            x2 = 239;
+            y2 = 184;
+            z2 = -224;
+          };
+      };
   };
 
 local function inBetween(val, a, b)

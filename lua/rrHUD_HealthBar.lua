@@ -22,7 +22,7 @@ function rr_HealthBar:draw()
 
   local healthPercentage = specPl.health/200
   local fillWidth = barWidth*healthPercentage
-  local fillWidth2 = fillWidth-2*(20/math.tan(0.913))
+  local fillWidth2 = math.max(fillWidth-2*(20/math.tan(0.913)), 0)
 
   local barColor = ColorA(PHGPHUD_BLUE_COLOR, 135)
   local strokeColor = ColorA(barColor, 255)

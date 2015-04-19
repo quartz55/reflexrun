@@ -22,7 +22,7 @@ function rr_ArmorBar:draw()
 
   local armorPercentage = specPl.armor/200
   local fillWidth = barWidth*armorPercentage
-  local fillWidth2 = fillWidth-2*(20/math.tan(0.913))
+  local fillWidth2 = math.max(fillWidth-2*(20/math.tan(0.913)), 0)
 
   local barColors = {}
   barColors[0] = ColorA(PHGPHUD_GREEN_COLOR, 135)

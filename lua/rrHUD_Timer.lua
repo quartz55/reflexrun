@@ -52,7 +52,7 @@ end
 local function stampTime(time)
 
   if time < timeStamps[1] then
-    -- rr_NewRecord:new()
+    rr_NewRecord:new()
   end
 
   for i, v in pairs(timeStamps) do
@@ -63,7 +63,7 @@ local function stampTime(time)
     end
   end
 
-  -- rr_TimeStamp:newStamp(time)
+  rr_TimeStamp:newStamp(time)
   rr_TimesList:updateList(timeStamps, time)
 end
 
