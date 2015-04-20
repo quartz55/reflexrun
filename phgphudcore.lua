@@ -1,6 +1,5 @@
 require "base/internal/ui/reflexcore"
 
-
 PHGPHUD_TIMER_MAX = 5999.99
 
 --------------------

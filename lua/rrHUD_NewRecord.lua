@@ -477,7 +477,7 @@ local function animate(text)
     local delayDone = delayT:update(deltaTimeRaw)
     if delayDone then
       if not soundPlayed then
-        for i=1,6,1 do
+        for i=1,4,1 do
           playSound("internal/ui/reflexrunHUD/sfx/newrecordfinal");
         end
         soundPlayed = true

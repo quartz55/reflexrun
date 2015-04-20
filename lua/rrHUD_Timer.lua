@@ -142,7 +142,7 @@ function rr_Timer:draw()
   -- Timer --
   -------------------------------------------------------------------------
   if rr_Timer.firstStart then
-    timer = Timer.new(deltaTimeRaw)
+    timer = Timer.new(deltaTime)
     rr_Timer.firstStart = false
     startZone = false
   end
