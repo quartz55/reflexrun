@@ -6,7 +6,6 @@ PHGPHUD_TIMER_MAX = 5999.99
 -- Util functions --
 --------------------
 
-
 function ColorA(color, alpha)
 	return Color(color.r, color.g, color.b, alpha);
 end
@@ -53,7 +52,7 @@ PHGPHUD_FONT_BOLD = "SourceSansPro-Bold";
 
 
 --------------------
--- Mixc functions --
+-- Misc functions --
 --------------------
 
 function drawTrapezoid(position, size, side)
@@ -105,6 +104,13 @@ function formatTime(timeS)
 
   local fullText = mins .. ":" .. secs .. ":" .. milis
   return fullText;
+end
+
+function checkIfSame(player1, player2)
+  return player1.name == player2.name
+    and player1.position.x == player2.position.x
+    and player1.position.y == player2.position.y
+    and player1.position.z == player2.position.z
 end
 
 --------------------
