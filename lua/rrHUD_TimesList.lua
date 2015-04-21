@@ -131,7 +131,7 @@ function rr_TimesList:draw()
 end
 
 function rr_TimesList:updateList(newList, newPrevTime)
-  prevTime = newPrevTime
+  prevTime = newPrevTime or prevTime
   for i,v in pairs(newList) do
     localList[i] = v
   end

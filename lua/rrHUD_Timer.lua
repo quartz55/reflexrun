@@ -47,10 +47,12 @@ local function resetTimes()
   return stamps
 end
 
-local function stampTime(time, player)
+local function stampTime(time, player, specPl)
+
+  player.prevTime = time
 
   if time < player.timeStamps[1]
-    and player.name == specPl.name
+    and checkIfSame(specPl, player)
   then
     rr_NewRecord:new()
   end
@@ -65,23 +67,29 @@ local function stampTime(time, player)
 
   if checkIfSame(specPl, player) then
     rr_TimeStamp:newStamp(time)
-    rr_TimesList:updateList(player.timeStamps, time)
+    rr_TimesList:updateList(player.timeStamps, player.prevTime)
   end
+end
+
+local function createNewPlayer(player)
+  local pl = {}
+  local pos = {}
+  pl.name = player.name
+  pos.x = player.position.x
+  pos.y = player.position.y
+  pos.z = player.position.z
+  pl.position = pos
+  pl.timeStamps = resetTimes()
+  pl.timer = Timer.new()
+  pl.prevTime = PHGPHUD_TIMER_MAX
+  pl.startZone = true
+  pl.endZone = false
+  return pl
 end
 
 local function createPlayerList(specPl)
   for i, v in pairs(players) do
-    local pl = {}
-    local pos = {}
-    pl.name = v.name
-    pos.x = v.position.x
-    pos.y = v.position.y
-    pos.z = v.position.z
-    pl.position = pos
-    pl.timeStamps = resetTimes()
-    pl.timer = Timer.new()
-    pl.startZone = false
-    pl.endZone = false
+    pl = createNewPlayer(v)
     playerList[#playerList+1] = pl
 
     if checkIfSame(specPl, pl) then
@@ -92,8 +100,10 @@ end
 
 local function updatePlayerList(specPl)
   for i, v in pairs(players) do
+    exists = false
     for j, n in pairs(playerList) do
       if v.name == n.name then
+        exists = true
         playerList[j].position.x = v.position.x
         playerList[j].position.y = v.position.y
         playerList[j].position.z = v.position.z
@@ -106,11 +116,12 @@ local function updatePlayerList(specPl)
           playerList[j].timer.counting = true
 
           -- If specing player play sound
-        if checkIfSame(specPl, playerList[j]) then
+          if checkIfSame(specPl, playerList[j]) then
             for i=1,PHGPHUD_TIMERSOUNDS_VOLUME,1 do
               playSound("internal/ui/reflexrunHUD/sfx/DefragStart");
             end
           end
+
         end
 
         -- Reset timer
@@ -127,10 +138,10 @@ local function updatePlayerList(specPl)
           and not playerList[j].endZone
         then
           playerList[j].timer.counting = false
-          stampTime(playerList[j].timer.timer, playerList[j])
+          stampTime(playerList[j].timer.timer, playerList[j], specPl)
 
           -- If specing player play sound
-        if checkIfSame(specPl, playerList[j]) then
+          if checkIfSame(specPl, playerList[j]) then
             for i=1,PHGPHUD_TIMERSOUNDS_VOLUME,1 do
               playSound("internal/ui/reflexrunHUD/sfx/DefragStop");
             end
@@ -147,12 +158,23 @@ local function updatePlayerList(specPl)
 
         -- If specing player show timer
         if checkIfSame(specPl, playerList[j]) then
+          rr_TimesList:updateList(playerList[j].timeStamps, playerList[j].prevTime)
           currTime = formatTime(playerList[j].timer.timer)
         end
 
       end
     end
+    if not exists then table.insert(playerList, createNewPlayer(v)) end
   end
+
+  -- Cleanup disconnected players
+  -- for i, v in pairs(playerList) do
+  --   exists = false
+  --   for j, n in pairs(players) do
+  --     if n.name == v.name then exists = true; break end
+  --   end
+  --   if not exists then table.remove(playerList, i) end
+  -- end
 end
 
 -------------------------------------------------------------------------
