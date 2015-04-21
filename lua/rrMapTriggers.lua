@@ -193,6 +193,27 @@ local mapTriggers =
             z2 = -224;
           };
       };
+    ["RRbrrun1"] =
+      {
+        ["begin"] =
+          {
+            x1 = -2;
+            y1 = 24;
+            z1 = -67;
+            x2 = 138;
+            y2 = 75;
+            z2 = 80;
+          };
+        ["end"] =
+          {
+            x1 = -389;
+            y1 = 920;
+            z1 = 1078;
+            x2 = -250;
+            y2 = 970;
+            z2 = 1226;
+          };
+      };
   };
 
 local function inBetween(val, a, b)
