@@ -14,17 +14,16 @@ registerWidget("rr_Timer");
 local Timer = {}
 Timer.__index = Timer
 
-function Timer.new(delta)
+function Timer.new()
   local self = setmetatable({}, Timer)
-  self.delta = delta
   self.timer = 0.0
   self.counting = false
   return self
 end
 
-function Timer.update(self)
+function Timer.update(self, delta)
   if self.counting then
-    self.timer = self.timer + self.delta
+    self.timer = self.timer + delta
   end
 end
 
@@ -142,7 +141,7 @@ function rr_Timer:draw()
   -- Timer --
   -------------------------------------------------------------------------
   if rr_Timer.firstStart then
-    timer = Timer.new(deltaTime)
+    timer = Timer.new()
     rr_Timer.firstStart = false
     startZone = false
   end
@@ -160,7 +159,7 @@ function rr_Timer:draw()
 
   -- Reset timer
   if timer.counting
-    and checkPlayerPosition(localPl, world.mapName, "begin")
+    and checkPlayerPosition(specPl, world.mapName, "begin")
   then
     timer.timer = 0.0
     timer.counting = false
@@ -183,7 +182,7 @@ function rr_Timer:draw()
 
   local currTime = formatTime(0)
   if timer ~= nil then
-    timer:update()
+    timer:update(deltaTimeRaw)
     currTime = formatTime(timer.timer)
   end
   -------------------------------------------------------------------------
