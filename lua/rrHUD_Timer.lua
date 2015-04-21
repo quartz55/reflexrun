@@ -14,17 +14,16 @@ registerWidget("rr_Timer");
 local Timer = {}
 Timer.__index = Timer
 
-function Timer.new(delta)
+function Timer.new()
   local self = setmetatable({}, Timer)
-  self.delta = delta
   self.timer = 0.0
   self.counting = false
   return self
 end
 
-function Timer.update(self)
+function Timer.update(self, delta)
   if self.counting then
-    self.timer = self.timer + self.delta
+    self.timer = self.timer + delta
   end
 end
 
@@ -36,37 +35,147 @@ end
 -------------------------------------------------------------------------
 -------------------------------------------------------------------------
 
-local startZone, endzone
-local currMap
+local playerList = {}
+local currMap, currTime
 local maxStamps = 5
 
-local timer
-local timeStamps = {}
-
 local function resetTimes()
+  local stamps = {}
   for i=1, maxStamps,1 do
-    timeStamps[i] = PHGPHUD_TIMER_MAX
+    stamps[i] = PHGPHUD_TIMER_MAX
   end
+  return stamps
 end
 
-local function stampTime(time)
+local function stampTime(time, player, specPl)
 
-  if time < timeStamps[1] then
+  player.prevTime = time
+
+  if time < player.timeStamps[1]
+    and checkIfSame(specPl, player)
+  then
     rr_NewRecord:new()
   end
 
-  for i, v in pairs(timeStamps) do
+  for i, v in pairs(player.timeStamps) do
     if time < v or v == nil then
-      table.insert(timeStamps, i, time)
-      timeStamps[maxStamps+1] = nil
+      table.insert(player.timeStamps, i, time)
+      table.remove(player.timeStamps, #player.timeStamps)
       break
     end
   end
 
-  rr_TimeStamp:newStamp(time)
-  rr_TimesList:updateList(timeStamps, time)
+  if checkIfSame(specPl, player) then
+    rr_TimeStamp:newStamp(time)
+    rr_TimesList:updateList(player.timeStamps, player.prevTime)
+  end
 end
 
+local function createNewPlayer(player)
+  local pl = {}
+  local pos = {}
+  pl.name = player.name
+  pos.x = player.position.x
+  pos.y = player.position.y
+  pos.z = player.position.z
+  pl.position = pos
+  pl.timeStamps = resetTimes()
+  pl.timer = Timer.new()
+  pl.prevTime = PHGPHUD_TIMER_MAX
+  pl.startZone = true
+  pl.endZone = false
+  return pl
+end
+
+local function createPlayerList(specPl)
+  for i, v in pairs(players) do
+    pl = createNewPlayer(v)
+    playerList[#playerList+1] = pl
+
+    if checkIfSame(specPl, pl) then
+      rr_TimesList:updateList(pl.timeStamps, PHGPHUD_TIMER_MAX)
+    end
+  end
+end
+
+local function updatePlayerList(specPl)
+  for i, v in pairs(players) do
+    exists = false
+    for j, n in pairs(playerList) do
+      if v.name == n.name then
+        exists = true
+        playerList[j].position.x = v.position.x
+        playerList[j].position.y = v.position.y
+        playerList[j].position.z = v.position.z
+
+        -- Start timer
+        if playerList[j].startZone
+          and not checkPlayerPosition(playerList[j], world.mapName, "begin")
+        then
+          playerList[j].timer.timer = 0.0
+          playerList[j].timer.counting = true
+
+          -- If specing player play sound
+          if checkIfSame(specPl, playerList[j]) then
+            for i=1,PHGPHUD_TIMERSOUNDS_VOLUME,1 do
+              playSound("internal/ui/reflexrunHUD/sfx/DefragStart");
+            end
+          end
+
+        end
+
+        -- Reset timer
+        if playerList[j].timer.counting
+          and checkPlayerPosition(playerList[j], world.mapName, "begin")
+        then
+          playerList[j].timer.timer = 0.0
+          playerList[j].timer.counting = false
+        end
+
+        -- End timer
+        if playerList[j].timer.counting
+        and checkPlayerPosition(playerList[j], world.mapName, "end")
+          and not playerList[j].endZone
+        then
+          playerList[j].timer.counting = false
+          stampTime(playerList[j].timer.timer, playerList[j], specPl)
+
+          -- If specing player play sound
+          if checkIfSame(specPl, playerList[j]) then
+            for i=1,PHGPHUD_TIMERSOUNDS_VOLUME,1 do
+              playSound("internal/ui/reflexrunHUD/sfx/DefragStop");
+            end
+          end
+
+        end
+
+        playerList[j].startZone = checkPlayerPosition(playerList[j], world.mapName, "begin")
+        playerList[j].endZone = checkPlayerPosition(playerList[j], world.mapName, "end")
+
+        if playerList[j].timer ~= nil then
+          playerList[j].timer:update(deltaTimeRaw)
+        end
+
+        -- If specing player show timer
+        if checkIfSame(specPl, playerList[j]) then
+          rr_TimesList:updateList(playerList[j].timeStamps, playerList[j].prevTime)
+          currTime = formatTime(playerList[j].timer.timer)
+        end
+
+      end
+    end
+    if not exists then table.insert(playerList, createNewPlayer(v)) end
+  end
+
+  -- Cleanup disconnected players
+  -- for i, v in pairs(playerList) do
+  --   exists = false
+  --   for j, n in pairs(players) do
+  --     if n.name == v.name then exists = true; break end
+  --   end
+  --   if not exists then table.remove(playerList, i) end
+  -- end
+end
 
 -------------------------------------------------------------------------
 -------------------------------------------------------------------------
@@ -77,13 +186,6 @@ function rr_Timer:draw()
   local localPl = getLocalPlayer()
   local specPl = getPlayer()
 
-
-  -- Reset times on load
-  if currMap ~= world.mapName or currMap == nil then
-    resetTimes()
-    rr_TimesList:updateList(timeStamps, PHGPHUD_TIMER_MAX)
-    currMap = world.mapName
-  end
 
   -- Sizes and positions
   local frameWidth = viewport.width
@@ -142,64 +244,32 @@ function rr_Timer:draw()
   -- Timer --
   -------------------------------------------------------------------------
   if rr_Timer.firstStart then
-    timer = Timer.new(deltaTimeRaw)
+    createPlayerList(specPl)
     rr_Timer.firstStart = false
-    startZone = false
   end
 
-  -- Start timer
-  if startZone
-    and not checkPlayerPosition(specPl, world.mapName, "begin")
-  then
-    timer.timer = 0.0
-    timer.counting = true
-    for i=1,PHGPHUD_TIMERSOUNDS_VOLUME,1 do
-      playSound("internal/ui/reflexrunHUD/sfx/DefragStart");
-    end
+  -- Reset times on load
+  if currMap ~= world.mapName or currMap == nil then
+    createPlayerList(specPl)
+    currMap = world.mapName
   end
 
-  -- Reset timer
-  if timer.counting
-    and checkPlayerPosition(localPl, world.mapName, "begin")
-  then
-    timer.timer = 0.0
-    timer.counting = false
-  end
+  updatePlayerList(specPl)
 
-  -- End timer
-  if timer.counting
-  and checkPlayerPosition(specPl, world.mapName, "end")
-    and not endZone
-  then
-    timer.counting = false
-    stampTime(timer.timer)
-    for i=1,PHGPHUD_TIMERSOUNDS_VOLUME,1 do
-      playSound("internal/ui/reflexrunHUD/sfx/DefragStop");
-    end
-  end
-
-  startZone = checkPlayerPosition(specPl, world.mapName, "begin")
-  endZone = checkPlayerPosition(specPl, world.mapName, "end")
-
-  local currTime = formatTime(0)
-  if timer ~= nil then
-    timer:update()
-    currTime = formatTime(timer.timer)
-  end
   -------------------------------------------------------------------------
   -------------------------------------------------------------------------
 
   -- testing
   drawTrapezoid({x = frameLeft, y = frameBot},
     {bottomWidth=frameWidth, topWidth = frameWidth2, height = frameHeight}, "full")
-    nvgFillLinearGradient(frameLeft, frameTop, frameLeft, frameBottom, ColorA(PHGPHUD_BLACK_COLOR, 225), ColorA(PHGPHUD_BLACK_COLOR, 245))
-    nvgFill()
-    nvgStrokeLinearGradient(frameLeft, frameTop, frameLeft, frameBottom, PHGPHUD_BLUE_COLOR, ColorA(PHGPHUD_BLUE_COLOR, 0))
-    nvgStroke()
-    nvgBeginPath()
-    nvgRect(frameLeft+(frameWidth-frameWidth2)/2, frameTop, frameWidth2, frameHeight)
-    nvgStrokeLinearGradient(frameLeft, frameTop, frameLeft, frameBottom, PHGPHUD_BLUE_COLOR, ColorA(PHGPHUD_BLUE_COLOR, 0))
-    nvgStroke()
+  nvgFillLinearGradient(frameLeft, frameTop, frameLeft, frameBottom, ColorA(PHGPHUD_BLACK_COLOR, 225), ColorA(PHGPHUD_BLACK_COLOR, 245))
+  nvgFill()
+  nvgStrokeLinearGradient(frameLeft, frameTop, frameLeft, frameBottom, PHGPHUD_BLUE_COLOR, ColorA(PHGPHUD_BLUE_COLOR, 0))
+  nvgStroke()
+  nvgBeginPath()
+  nvgRect(frameLeft+(frameWidth-frameWidth2)/2, frameTop, frameWidth2, frameHeight)
+  nvgStrokeLinearGradient(frameLeft, frameTop, frameLeft, frameBottom, PHGPHUD_BLUE_COLOR, ColorA(PHGPHUD_BLUE_COLOR, 0))
+  nvgStroke()
 
   -- Draw frame
   -- nvgBeginPath();
