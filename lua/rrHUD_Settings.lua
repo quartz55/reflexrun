@@ -7,6 +7,7 @@ registerWidget("reflexrun");
 
 function reflexrun:draw()
   consolePerformCommand("ui_reset")
+  consolePerformCommand("ui_hide_all")
   rr_Timer:settings()
   rr_HealthBar:settings()
   rr_ArmorBar:settings()
