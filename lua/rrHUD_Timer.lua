@@ -117,7 +117,7 @@ local function updatePlayerList(specPl)
 
           -- If specing player play sound
           if checkIfSame(specPl, playerList[j]) then
-            for i=1,PHGPHUD_TIMERSOUNDS_VOLUME,1 do
+            for i=1,PHGPHUD_TIMERSOUNDS_VOLUME-3,1 do
               playSound("internal/ui/reflexrunHUD/sfx/DefragStart");
             end
           end
