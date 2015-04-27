@@ -55,6 +55,7 @@ local accel, prevAng, timer, timer2, fps
 local playerSpeed = Vector2D.new(0,0)
 local deltaSpeed = Vector2D.new(0,0)
 local playerAccel = Vector2D.new(0,0)
+local radius = 100
 
 function rr_AccelMeter:draw()
 
@@ -126,7 +127,7 @@ function rr_AccelMeter:draw()
   local ang_diff_min = t_ang_min-math.rad(pl_ang)
   local ang_diff_op = t_ang_op-math.rad(pl_ang)
 
-  local lineSize = 100
+  local lineSize = radius
   local dir = NVG_CW
   if ang_diff_min < ang_diff_op then dir = NVG_CW
   else dir = NVG_CCW end
@@ -165,6 +166,6 @@ end
 function rr_AccelMeter:settings()
   consolePerformCommand("ui_show_widget rr_AccelMeter")
   consolePerformCommand("ui_set_widget_anchor rr_AccelMeter 0 0")
-  consolePerformCommand("ui_set_widget_offset rr_AccelMeter 0 50")
+  consolePerformCommand("ui_set_widget_offset rr_AccelMeter 0 " .. radius)
   consolePerformCommand("ui_set_widget_scale rr_AccelMeter 1")
 end
