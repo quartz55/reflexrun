@@ -29,7 +29,8 @@ local function drawList(list)
 
   local trapWidth2 = (maxTimers+3)*frameHeight
   local trapHeight = frameWidth
-  local trapWidth = trapWidth2+2*(trapHeight/math.tan(0.913))
+  -- local trapWidth = trapWidth2+2*(trapHeight/math.tan(0.913))
+  local trapWidth = trapWidth2+2*(trapHeight/math.tan(math.pi/4))
 
   local textX = frameWidth/2
   local textY = -trapWidth2/2

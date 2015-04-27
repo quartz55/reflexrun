@@ -13,8 +13,8 @@ function rr_ArmorBar:draw()
   local localPl = getLocalPlayer()
   local specPl = getPlayer()
 
-  local barWidth = viewport.width/2*0.95
   local barHeight = 20
+  local barWidth = (viewport.width-2*(PHGPHUD_BARS_HEIGHT/math.tan(math.pi/4)))/2
   local barRight = barWidth
   local barLeft = 0
   local barTop = -barHeight
@@ -22,7 +22,8 @@ function rr_ArmorBar:draw()
 
   local armorPercentage = specPl.armor/200
   local fillWidth = barWidth*armorPercentage
-  local fillWidth2 = math.max(fillWidth-2*(20/math.tan(0.913)), 0)
+  -- local fillWidth2 = math.max(fillWidth-2*(20/math.tan(0.913)), 0)
+  local fillWidth2 = math.max(fillWidth-2*(20/math.tan(math.pi/4)), 0)
 
   local barColors = {}
   barColors[0] = ColorA(PHGPHUD_GREEN_COLOR, 135)

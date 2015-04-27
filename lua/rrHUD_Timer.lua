@@ -189,8 +189,10 @@ function rr_Timer:draw()
 
   -- Sizes and positions
   local frameWidth = viewport.width
-  local frameWidth2 = frameWidth*0.95
+  -- local frameWidth2 = frameWidth*0.95
   local frameHeight = PHGPHUD_BARS_HEIGHT
+  local frameWidth2 = frameWidth-2*(frameHeight/math.tan(math.pi/4))
+  -- local frameWidth2 = frameWidth-2*(frameHeight/math.tan(0.913))
 
   local frameTop = -frameHeight
   local frameBottom = 0
