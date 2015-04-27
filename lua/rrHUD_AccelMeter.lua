@@ -109,14 +109,22 @@ function rr_AccelMeter:draw()
   local a = o/2+opt_ang
   local e = a-math.pi/4
   local t_ang_min = vel_ang
+  local t_ang_op_m = vel_ang
   local t_ang_op = vel_ang
-  if specPl.anglesDegrees.x-prevAng > 0 then
-    -- t_ang_min = t_ang_min + min_ang
+
+  if specPl.buttons.right then
+    t_ang_op_m = t_ang_op + 1*e
     t_ang_op = t_ang_op + 1.2*e
-  elseif specPl.anglesDegrees.x-prevAng < 0 then
-    -- t_ang_min = t_ang_min - min_ang
+  elseif specPl.buttons.left then
+    t_ang_op_m = t_ang_op - 1*e
     t_ang_op = t_ang_op - 1.2*e
   end
+
+  -- if specPl.anglesDegrees.x-prevAng > 0 then
+  --   t_ang_op = t_ang_op + 1.2*e
+  -- elseif specPl.anglesDegrees.x-prevAng < 0 then
+  --   t_ang_op = t_ang_op - 1.2*e
+  -- end
 
   if timer >= 1/10 then
     timer = 0
@@ -125,41 +133,52 @@ function rr_AccelMeter:draw()
   timer = timer + deltaTimeRaw
 
   local ang_diff_min = t_ang_min-math.rad(pl_ang)
+  local ang_diff_op_m = t_ang_op_m-math.rad(pl_ang)
   local ang_diff_op = t_ang_op-math.rad(pl_ang)
 
   local lineSize = radius
   local dir = NVG_CW
-  if ang_diff_min < ang_diff_op then dir = NVG_CW
-  else dir = NVG_CCW end
-  nvgBeginPath()
-  nvgMoveTo(0,0)
-  nvgArc(0,0, lineSize, ang_diff_min-math.pi/2, ang_diff_op-math.pi/2, dir)
-  nvgFillColor(ColorA(PHGPHUD_BLUE_COLOR, 105))
-  nvgStrokeColor(PHGPHUD_BLUE_COLOR)
-  nvgStrokeWidth(3)
-  nvgStroke()
-  nvgFill()
+  if ang_diff_min < ang_diff_op then dir = NVG_CW else dir = NVG_CCW end
 
+  nvgBeginPath()
+  nvgArc(0,0, lineSize, ang_diff_min-math.pi/2, ang_diff_op_m-math.pi/2, dir)
+  nvgStrokeColor(ColorA(PHGPHUD_BLUE_COLOR, 120))
+  nvgStrokeWidth(50)
+  nvgStroke()
+
+  nvgBeginPath()
+  nvgArc(0,0, lineSize, ang_diff_op_m-math.pi/2, ang_diff_op-math.pi/2, dir)
+  nvgStrokeColor(ColorA(PHGPHUD_GREEN_COLOR, 120))
+  nvgStrokeWidth(50)
+  nvgStroke()
+
+
+  ----------------------
+  -- Lines
+  ----------------------
   nvgBeginPath()
   nvgMoveTo(0, 0)
   nvgLineTo(lineSize*math.cos(ang_diff_min-math.pi/2), lineSize*math.sin(ang_diff_min-math.pi/2))
   nvgStrokeWidth(3)
   nvgStrokeColor(PHGPHUD_YELLOW_COLOR)
-  nvgStroke()
+  -- nvgStroke()
 
   nvgBeginPath()
   nvgMoveTo(0, 0)
   nvgLineTo(lineSize*math.cos(ang_diff_op-math.pi/2), lineSize*math.sin(ang_diff_op-math.pi/2))
   nvgStrokeWidth(3)
   nvgStrokeColor(PHGPHUD_BLUE_COLOR)
-  nvgStroke()
+  -- nvgStroke()
+
+  ----------------------
+  ----------------------
 
   nvgFontSize(50);
   nvgFontFace(PHGPHUD_FONT_BOLD);
   nvgTextAlign(NVG_ALIGN_CENTER, NVG_ALIGN_MIDDLE);
 
   nvgFillColor(PHGPHUD_WHITE_COLOR);
-  nvgText(0, 100, pl_ang .. " | " .. math.floor(math.deg(vel_ang)))
+  -- nvgText(0, 100, pl_ang .. " | " .. math.floor(math.deg(vel_ang)))
 
 end
 
