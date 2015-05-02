@@ -1,6 +1,6 @@
 require "base/internal/ui/reflexcore"
 
-PHGPHUD_TIMER_MAX = 5999.99
+PHGPHUD_TIMER_MAX = 5999.999
 
 --------------------
 -- Util functions --
@@ -93,14 +93,15 @@ function formatTime(timeS)
   t.seconds = math.floor(time/1000);
   t.minutes = math.floor(t.seconds / 60);
   t.seconds = t.seconds - t.minutes * 60;
-  t.mili = math.floor((time - (t.seconds * 1000) - (t.minutes * 60 * 1000))/10)
+  t.mili = math.floor((time - (t.seconds * 1000) - (t.minutes * 60 * 1000)))
 
   local mins = t.minutes
   if mins < 10 then mins = "0"..mins end
   local secs = t.seconds
   if secs < 10 then secs = "0"..secs end
   local milis = t.mili
-  if milis < 10 then milis = "0"..milis end
+  if t.mili < 100 then milis = "0"..milis end
+  if t.mili < 10 then milis = "0"..milis end
 
   local fullText = mins .. ":" .. secs .. ":" .. milis
   return fullText;

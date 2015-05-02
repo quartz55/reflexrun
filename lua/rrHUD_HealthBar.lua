@@ -13,8 +13,8 @@ function rr_HealthBar:draw()
   local localPl = getLocalPlayer()
   local specPl = getPlayer()
 
-  local barWidth = viewport.width/2*0.95
   local barHeight = 20
+  local barWidth = (viewport.width-2*(PHGPHUD_BARS_HEIGHT/math.tan(math.pi/4)))/2
   local barRight = 0
   local barLeft = barWidth
   local barTop = -barHeight
@@ -22,7 +22,8 @@ function rr_HealthBar:draw()
 
   local healthPercentage = specPl.health/200
   local fillWidth = barWidth*healthPercentage
-  local fillWidth2 = math.max(fillWidth-2*(20/math.tan(0.913)), 0)
+  -- local fillWidth2 = math.max(fillWidth-2*(barHeight/math.tan(0.913)), 0)
+  local fillWidth2 = math.max(fillWidth-2*(barHeight/math.tan(math.pi/4)), 0)
 
   local barColor = ColorA(PHGPHUD_BLUE_COLOR, 135)
   local strokeColor = ColorA(barColor, 255)

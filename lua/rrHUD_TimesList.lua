@@ -24,12 +24,13 @@ local function drawList(list)
   nvgFontFace(PHGPHUD_FONT_BOLD);
   nvgTextAlign(NVG_ALIGN_CENTER, NVG_ALIGN_TOP);
 
-  local frameWidth = nvgTextWidth("00:00:00") + 20
+  local frameWidth = nvgTextWidth("00:00:000") + 20
   local frameHeight = timerSize+20
 
   local trapWidth2 = (maxTimers+3)*frameHeight
   local trapHeight = frameWidth
-  local trapWidth = trapWidth2+2*(trapHeight/math.tan(0.913))
+  -- local trapWidth = trapWidth2+2*(trapHeight/math.tan(0.913))
+  local trapWidth = trapWidth2+2*(trapHeight/math.tan(math.pi/4))
 
   local textX = frameWidth/2
   local textY = -trapWidth2/2

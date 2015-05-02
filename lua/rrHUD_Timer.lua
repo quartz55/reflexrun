@@ -117,7 +117,7 @@ local function updatePlayerList(specPl)
 
           -- If specing player play sound
           if checkIfSame(specPl, playerList[j]) then
-            for i=1,PHGPHUD_TIMERSOUNDS_VOLUME,1 do
+            for i=1,PHGPHUD_TIMERSOUNDS_VOLUME-3,1 do
               playSound("internal/ui/reflexrunHUD/sfx/DefragStart");
             end
           end
@@ -189,8 +189,8 @@ function rr_Timer:draw()
 
   -- Sizes and positions
   local frameWidth = viewport.width
-  local frameWidth2 = frameWidth*0.95
   local frameHeight = PHGPHUD_BARS_HEIGHT
+  local frameWidth2 = frameWidth-2*(frameHeight/math.tan(math.pi/4))
 
   local frameTop = -frameHeight
   local frameBottom = 0
