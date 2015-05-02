@@ -141,7 +141,7 @@ function rr_AccelMeter:draw()
   if ang_diff_min < ang_diff_op then dir = NVG_CW else dir = NVG_CCW end
 
   nvgBeginPath()
-  nvgArc(0,0, lineSize, ang_diff_min-math.pi/2, ang_diff_op_m-math.pi/2, dir)
+  nvgArc(0,0, lineSize, ang_diff_min-math.pi/2, ang_diff_op-math.pi/2, dir)
   nvgStrokeColor(ColorA(PHGPHUD_BLUE_COLOR, 120))
   nvgStrokeWidth(50)
   nvgStroke()
