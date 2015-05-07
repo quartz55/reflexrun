@@ -275,6 +275,12 @@ function rr_Timer:draw()
   nvgFillColor(fontColor);
   nvgText(timerFontX, timerFontY, currTime)
 
+  if DEBUG then
+  local time = formatTime(specPl.raceTimeCurrent)
+  if not specPl.raceActive then time = formatTime(specPl.raceTimePrevious) end
+  nvgText(timerFontX, timerFontY-100, time)
+  end
+
   -- Draw logo icon
   nvgFillColor(logoIconColor);
   nvgSvg(logoIcon, logoIconX, logoIconY, logoIconSize);
