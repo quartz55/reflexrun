@@ -1,6 +1,6 @@
 require "base/internal/ui/reflexcore"
 
-PHGPHUD_TIMER_MAX = 5999.999
+PHGPHUD_TIMER_MAX = 5999999
 
 --------------------
 -- Util functions --
@@ -88,7 +88,7 @@ end
 function formatTime(timeS)
   local t = {};
 
-  local time = timeS * 1000
+  local time = timeS
 
   t.seconds = math.floor(time/1000);
   t.minutes = math.floor(t.seconds / 60);
@@ -109,9 +109,6 @@ end
 
 function checkIfSame(player1, player2)
   return player1.name == player2.name
-    and player1.position.x == player2.position.x
-    and player1.position.y == player2.position.y
-    and player1.position.z == player2.position.z
 end
 
 --------------------
