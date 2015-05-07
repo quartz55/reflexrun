@@ -6,15 +6,8 @@ rr_Tutorial =
 
 registerWidget("rr_Tutorial");
 
-local tween = require "base/internal/ui/reflexrunHUD/lua/tween"
-
-local svgSize = 500
-
-local tVals = {alpha=0;y=65}
-
-local animating = false
-
-local alphaT, yT, yT, yT, yT
+local rectY = -180
+local rectH = 380
 -------------------------------------------------------------------------
 -------------------------------------------------------------------------
 function rr_Tutorial:draw()
@@ -28,38 +21,39 @@ function rr_Tutorial:draw()
   local svgX = 0
   local svgY = 0
 
+  local logoIcon = "internal/ui/reflexrunHUD/icons/reflexrun";
+
   if showScores then
-    nvgFillColor(PHGPHUD_WHITE_COLOR);
-    nvgSvg(tutorialSVG, svgX, svgX, svgSize);
+
+    nvgBeginPath()
+    nvgRect(-400, rectY, 800, rectH)
+    nvgFillColor(ColorA(PHGPHUD_BLACK_COLOR, 135))
+    nvgFill()
+
+    nvgFillColor(PHGPHUD_WHITE_COLOR)
+    nvgSvg(logoIcon, 0, -50, 300)
+
+    nvgFontSize(22)
+    nvgFontFace(PHGPHUD_FONT_BOLD)
+    nvgTextAlign(NVG_ALIGN_CENTER, NVG_ALIGN_MIDDLE)
+    nvgFillColor(PHGPHUD_WHITE_COLOR)
+    nvgText(0, 0, "Version 1.0")
+    nvgText(0, 22, "created by quartz and zEv")
+
+    nvgFontSize(20)
+    nvgFontFace(PHGPHUD_FONT_REGULAR)
+    nvgTextAlign(NVG_ALIGN_CENTER, NVG_ALIGN_MIDDLE)
+    nvgFillColor(PHGPHUD_WHITE_COLOR)
+    nvgText(0, 100,
+            "Maps made for Reflexrun are labeled with \"RR\" - All maps are on PHGP.TV Reflexrun / Movement server.")
+    nvgText(0, 120,
+            "Check www.phgp.tv for more information, tutorials and updates!")
   end
-
-  -- if showScores then
-  --   if not animating then
-  --     animating = true
-
-  --     alphaT = tween.new(1-tVals.alpha+0.01, tVals, {alpha = 1}, 'outQuint')
-  --     yT = tween.new(1-(65-tVals.y)/65+0.01, tVals, {y = 0}, 'outQuint')
-  --   end
-  -- elseif animating then
-  --   animating = false
-
-  --   alphaT = tween.new(tVals.alpha*0.5+0.01, tVals, {alpha = 0}, 'inQuint')
-  --   yT = tween.new(0.5-(tVals.y/65)*0.5+0.01, tVals, {y = 65}, 'inQuint')
-  -- end
-
-  -- if alphaT ~= null then alphaT:update(deltaTimeRaw) end
-  -- if yT ~= null then yT:update(deltaTimeRaw) end
-
-  -- if tVals.alpha <= 0 then return end
-
-  -- nvgFillColor(ColorA(PHGPHUD_WHITE_COLOR, 255*tVals.alpha));
-  -- nvgSvg(tutorialSVG, svgX, svgX+tVals.y, svgSize);
-
 end
 
 function rr_Tutorial:settings()
   consolePerformCommand("ui_show_widget rr_Tutorial")
   consolePerformCommand("ui_set_widget_anchor rr_Tutorial 0 1")
-  consolePerformCommand("ui_set_widget_offset rr_Tutorial 0 " .. -PHGPHUD_BARS_HEIGHT - svgSize/2*0.95)
+  consolePerformCommand("ui_set_widget_offset rr_Tutorial 0 " .. -PHGPHUD_BARS_HEIGHT-rectY-rectH-20)
   consolePerformCommand("ui_set_widget_scale rr_Tutorial 1")
 end
