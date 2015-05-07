@@ -18,7 +18,7 @@ end
 --------------------------
 
 -- Sound files
-PHGPHUD_TIMERSOUNDS_VOLUME = 5; -- Keep this below 8 plz :P
+PHGPHUD_TIMERSOUNDS_VOLUME = 2; -- Keep this below 8 plz :P
 
 -- Sizes
 PHGPHUD_BARS_HEIGHT = 65;
