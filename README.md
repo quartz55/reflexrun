@@ -9,11 +9,6 @@ CREATED BY QUARTZ AND ZEV
   
   It will look somewhat like this: **Reflexfps -> base -> internal -> ui -> reflexrunHUD**
 
-* ##### Installing the Maps
-
-  Copy the maps included in the pack (and future RRmaps) into the Reflex Maps folder.
-  Which you can find here: **Reflexfps -> Base -> internal - > Maps**
-
 * ##### Play Reflexrun!
 
   If you want to record / practice locally you can do so by typing `map RRmapname`
