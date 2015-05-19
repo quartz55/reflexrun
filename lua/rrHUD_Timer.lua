@@ -154,8 +154,8 @@ local function updatePlayerList(specPl)
       ::continue::
 
     end
+    if not exists then table.insert(playerList, createNewPlayer(v)) end
   end
-  if not exists then table.insert(playerList, createNewPlayer(v)) end
 end
 
 -------------------------------------------------------------------------
