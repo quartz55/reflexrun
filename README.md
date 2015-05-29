@@ -1,7 +1,8 @@
 # REFLEXRUN
 
-[![Join the chat at https://gitter.im/quartz55/reflexrun](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/quartz55/reflexrun?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 CREATED BY QUARTZ AND ZEV
+
+[![Join the chat at https://gitter.im/quartz55/reflexrun](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/quartz55/reflexrun?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 ### HOW TO GET STARTED
 
