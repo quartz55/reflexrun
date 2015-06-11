@@ -8,28 +8,6 @@ rr_Timer =
 registerWidget("rr_Timer");
 
 -------------------------------------------------------------------------
--- Timer Class
--------------------------------------------------------------------------
-local Timer = {}
-Timer.__index = Timer
-
-function Timer.new(time)
-  local self = setmetatable({}, Timer)
-  self.timer = time or 0.0
-  self.counting = false
-  return self
-end
-
-function Timer.update(self, newTime)
-  self.timer = newTime
-end
-
-function Timer.reset(self)
-  self.timer = 0
-  self.counting = false
-end
-
--------------------------------------------------------------------------
 -------------------------------------------------------------------------
 
 local playerList = {}
@@ -88,57 +66,56 @@ end
 
 local function updatePlayerList(specPl)
 
-  local latestEntry = nil
+
   -- count log messages
   local logCount = 0
   for k, v in pairs(log) do
     logCount = logCount + 1;
   end
+
   -- read log messages
+  local latestEntry = {}
   for i = 1, logCount do
     local logEntry = log[i];
     if logEntry.age <= deltaTime then
-      latestEntry = logEntry
-      break
+      table.insert(latestEntry, logEntry)
     end
   end
 
   for i, v in pairs(players) do
+    exists = false
     for j, n in pairs(playerList) do
-      exists = false
       if v.name == n.name then
         exists = true
 
         playerList[j].time = players[i].raceTimeCurrent
         playerList[j].prevTime = players[i].raceTimePrevious
 
-        if latestEntry == nil then goto continue end
-        -- is race entry?
-        if latestEntry.type == LOG_TYPE_RACEEVENT then
-          if players[latestEntry.racePlayerIndex].name == playerList[j].name then
-            -- Start timer
-            if latestEntry.raceEvent == RACE_EVENT_START then
-              -- If specing play sound
-              if checkIfSame(specPl, playerList[j]) then
-                playSound("internal/ui/reflexrunHUD/sfx/DefragStart");
+        -- Check latest entries
+        for index, entry in pairs(latestEntry) do
+          -- is race entry?
+          if entry.type == LOG_TYPE_RACEEVENT then
+            if players[entry.racePlayerIndex].name == playerList[j].name then
+              -- Start timer Event
+              if entry.raceEvent == RACE_EVENT_START then
+                if checkIfSame(specPl, playerList[j]) then
+                  playSound("internal/ui/reflexrunHUD/sfx/DefragStart");
+                end
               end
-            end
 
-            -- End timer
-            if latestEntry.raceEvent == RACE_EVENT_FINISH or
-              latestEntry.raceEvent == RACE_EVENT_FINISHANDWASRECORD
-            then
-              stampTime(playerList[j].prevTime, playerList[j], specPl)
-              -- If specing play sound
-              if checkIfSame(specPl, playerList[j]) then
-                for i=1,PHGPHUD_TIMERSOUNDS_VOLUME,1 do
+              -- End timer Event
+              if entry.raceEvent == RACE_EVENT_FINISH or
+                entry.raceEvent == RACE_EVENT_FINISHANDWASRECORD
+              then
+                stampTime(playerList[j].prevTime, playerList[j], specPl)
+
+                if checkIfSame(specPl, playerList[j]) then
                   playSound("internal/ui/reflexrunHUD/sfx/DefragStop");
                 end
               end
             end
           end
         end
-
       end
 
       -- If specing specPl show times
@@ -150,10 +127,8 @@ local function updatePlayerList(specPl)
           currTime = formatTime(playerList[j].time)
         end
       end
-
-      ::continue::
-
     end
+
     if not exists then table.insert(playerList, createNewPlayer(v)) end
   end
 end
@@ -166,7 +141,6 @@ function rr_Timer:draw()
 
   local localPl = getLocalPlayer()
   local specPl = getPlayer()
-
 
   -- Sizes and positions
   local frameWidth = viewport.width
@@ -276,9 +250,9 @@ function rr_Timer:draw()
   nvgText(timerFontX, timerFontY, currTime)
 
   if DEBUG then
-  local time = formatTime(specPl.raceTimeCurrent)
-  if not specPl.raceActive then time = formatTime(specPl.raceTimePrevious) end
-  nvgText(timerFontX, timerFontY-100, time)
+    local time = formatTime(specPl.raceTimeCurrent)
+    if not specPl.raceActive then time = formatTime(specPl.raceTimePrevious) end
+    nvgText(timerFontX, timerFontY-100, time)
   end
 
   -- Draw logo icon
