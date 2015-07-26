@@ -287,7 +287,6 @@ function rr_AccelMeter:drawOptions(x, y)
 
     user.guideCircle = false;
     user.guideLine = false;
-    user.guideLock = true;
 
     user.blueWidthC = 50;
     user.greenWidthC = 50;
