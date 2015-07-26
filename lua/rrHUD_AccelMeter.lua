@@ -2,8 +2,34 @@ require "base/internal/ui/reflexrunHUD/phgphudcore"
 
 rr_AccelMeter =
   {
+    canPosition = false; -- hide default widget sliders
+
+    userData = {};
   };
 registerWidget("rr_AccelMeter");
+
+function rr_AccelMeter:initialize()
+  self.userData = loadUserData();
+
+  CheckSetDefaultValue(self, "userData", "table", {});
+
+  CheckSetDefaultValue(self.userData, "drawAccelCircle", "boolean", true);
+  CheckSetDefaultValue(self.userData, "drawAccelLine", "boolean", false);
+  CheckSetDefaultValue(self.userData, "drawBlueLine", "boolean", true);
+
+  CheckSetDefaultValue(self.userData, "guideCircle", "boolean", false);
+  CheckSetDefaultValue(self.userData, "guideLine", "boolean", false);
+  CheckSetDefaultValue(self.userData, "blueWidthC", "number", 50);
+  CheckSetDefaultValue(self.userData, "greenWidthC", "number", 50);
+  CheckSetDefaultValue(self.userData, "radiusC", "number", 100);
+  CheckSetDefaultValue(self.userData, "lineScaleC", "number", 1);
+  CheckSetDefaultValue(self.userData, "offsetC", "number", 100);
+
+  CheckSetDefaultValue(self.userData, "blueWidthL", "number", 35);
+  CheckSetDefaultValue(self.userData, "greenWidthL", "number", 35);
+  CheckSetDefaultValue(self.userData, "lineScaleL", "number", 3);
+  CheckSetDefaultValue(self.userData, "offsetL", "number", 0);
+end
 
 -------------------------------------------------------------------------
 -- Vector2D Class --
@@ -55,7 +81,6 @@ local accel, prevAng, timer, timer2, fps
 local playerSpeed = Vector2D.new(0,0)
 local deltaSpeed = Vector2D.new(0,0)
 local playerAccel = Vector2D.new(0,0)
-local radius = 100
 
 function rr_AccelMeter:draw()
 
@@ -63,6 +88,21 @@ function rr_AccelMeter:draw()
 
   local localPl = getLocalPlayer()
   local specPl = getPlayer()
+
+  local drawAccelCircle = self.userData.drawAccelCircle
+  local drawAccelLine = self.userData.drawAccelLine
+  local drawBlueLine = self.userData.drawBlueLine
+  local guideCircle = self.userData.guideCircle
+  local guideLine = self.userData.guideLine
+  local blueWidthC = self.userData.blueWidthC
+  local greenWidthC = self.userData.greenWidthC
+  local radiusC = self.userData.radiusC
+  local lineScaleC = self.userData.lineScaleC
+  local offsetC = self.userData.offsetC
+  local blueWidthL = self.userData.blueWidthL
+  local greenWidthL = self.userData.greenWidthL
+  local lineScaleL = self.userData.lineScaleL
+  local offsetL = self.userData.offsetL
 
   if prevAng == nil then prevAng = specPl.anglesDegrees.x end
   if timer == nil then timer = 0 end
@@ -103,6 +143,11 @@ function rr_AccelMeter:draw()
   if playerSpeed.y >= 0 then vel_ang = playerSpeed:angle(vec_nx)
   else vel_ang = math.pi + playerSpeed:angle(vec_x) end
 
+  if specPl.buttons.back then  -- Backwards strafe jumping
+    vel_ang = -vel_ang
+    pl_ang = -pl_ang + 180
+  end
+
   local min_ang = math.acos(320/playerSpeed:size())
   local opt_ang = math.acos((320-accel)/playerSpeed:size())
   local o = math.atan((accel*math.sqrt(math.pow(playerSpeed:size(), 2) - math.pow(320-accel, 2)))/(math.pow(playerSpeed:size(), 2) + accel*(320-accel)))
@@ -136,22 +181,69 @@ function rr_AccelMeter:draw()
   local ang_diff_op_m = t_ang_op_m-math.rad(pl_ang)
   local ang_diff_op = t_ang_op-math.rad(pl_ang)
 
-  local lineSize = radius
+  local lineSize = radiusC
   local dir = NVG_CW
   if ang_diff_min < ang_diff_op then dir = NVG_CW else dir = NVG_CCW end
 
-  nvgBeginPath()
-  nvgArc(0,0, lineSize, ang_diff_min-math.pi/2, ang_diff_op-math.pi/2, dir)
-  nvgStrokeColor(ColorA(PHGPHUD_BLUE_COLOR, 120))
-  nvgStrokeWidth(50)
-  nvgStroke()
+  local cgazB1 = (radiusC * math.cos(ang_diff_min-math.pi/2)) * lineScaleL
+  local cgazB2 = (radiusC * math.cos(ang_diff_op-math.pi/2)) * lineScaleL
+  local cgazG1 = (radiusC * math.cos(ang_diff_op_m-math.pi/2)) * lineScaleL
+  local cgazG2 = (radiusC * math.cos(ang_diff_op-math.pi/2)) * lineScaleL
 
-  nvgBeginPath()
-  nvgArc(0,0, lineSize, ang_diff_op_m-math.pi/2, ang_diff_op-math.pi/2, dir)
-  nvgStrokeColor(ColorA(PHGPHUD_GREEN_COLOR, 120))
-  nvgStrokeWidth(50)
-  nvgStroke()
+  ang_diff_min = ang_diff_min * lineScaleC
+  ang_diff_op_m = ang_diff_op_m * lineScaleC
+  ang_diff_op = ang_diff_op * lineScaleC
 
+  if specPl.buttons.forward or specPl.buttons.back then
+    if drawAccelCircle then
+      nvgBeginPath()
+      nvgArc(0, offsetC, radiusC, ang_diff_min-math.pi/2, ang_diff_op-math.pi/2, dir)
+      nvgStrokeColor(ColorA(PHGPHUD_BLUE_COLOR, 120))
+      nvgStrokeWidth(blueWidthC)
+      if drawBlueLine then nvgStroke() end
+
+      nvgBeginPath()
+      nvgArc(0, offsetC, radiusC, ang_diff_op_m-math.pi/2, ang_diff_op-math.pi/2, dir)
+      nvgStrokeColor(ColorA(PHGPHUD_GREEN_COLOR, 120))
+      nvgStrokeWidth(greenWidthC)
+      nvgStroke()
+    end
+
+    if drawAccelLine then
+      nvgBeginPath()
+      nvgMoveTo(cgazB1, offsetL)
+      nvgLineTo(cgazB2, offsetL)
+      nvgStrokeColor(ColorA(PHGPHUD_BLUE_COLOR, 120))
+      nvgStrokeWidth(blueWidthL)
+      if drawBlueLine then nvgStroke() end
+
+      nvgBeginPath()
+      nvgMoveTo(cgazG1, offsetL)
+      nvgLineTo(cgazG2, offsetL)
+      nvgStrokeColor(ColorA(PHGPHUD_GREEN_COLOR, 120))
+      nvgStrokeWidth(greenWidthL)
+      nvgStroke()
+    end
+  end
+
+  -- Guide Circle
+  if guideCircle and drawAccelCircle then
+    nvgBeginPath()
+    nvgCircle(0, offsetC, radiusC + blueWidthC/2 + 3)
+    nvgStrokeColor(ColorA(PHGPHUD_BLUE_COLOR, 80))
+    nvgStrokeWidth(6)
+    nvgStroke()
+  end
+
+  -- Guide Line
+  if guideLine and drawAccelCircle then
+    nvgBeginPath()
+    nvgStrokeColor(ColorA(PHGPHUD_RED_COLOR, 120))
+    nvgStrokeWidth(6)
+    nvgMoveTo(0, offsetC + -radiusC - blueWidthC/2 - 8)
+    nvgLineTo(0, offsetC + -radiusC - blueWidthC/2 + 12)
+    nvgStroke()
+  end
 
   ----------------------
   -- Lines
@@ -182,9 +274,102 @@ function rr_AccelMeter:draw()
 
 end
 
+function rr_AccelMeter:drawOptions(x, y)
+  local sliderWidth = 200;
+  local sliderStart = 140;
+
+  local user = self.userData;
+
+  if uiButton("Reset Settings", nil, x + 250, y - 35, 150, UI_DEFAULT_BUTTON_HEIGHT, PHGPHUD_RED_COLOR) then
+    user.drawAccelCircle = true;
+    user.drawAccelLine = false;
+    user.drawBlueLine = true;
+
+    user.guideCircle = false;
+    user.guideLine = false;
+    user.guideLock = true;
+
+    user.blueWidthC = 50;
+    user.greenWidthC = 50;
+    user.radiusC = 100;
+    user.lineScaleC = 1;
+    user.offsetC = 100;
+
+    user.blueWidthL = 35;
+    user.greenWidthL = 35;
+    user.lineScaleL = 3;
+    user.offsetL = 0;
+  end
+
+  uiLabel("DRAW ACCELMETER AS", x + 10, y);
+  y = y + 35;
+
+  user.drawAccelCircle = uiCheckBox(user.drawAccelCircle, "Circle", x, y);
+  user.drawAccelLine = uiCheckBox(user.drawAccelLine, "Line", x + 100, y);
+  user.drawBlueLine = uiCheckBox(user.drawBlueLine, "With Blue Area", x + 220, y);
+  y = y + 50;
+
+  uiLabel("SETTINGS FOR CIRCULAR ACCELMETER", x + 10, y);
+  y = y + 35;
+
+  user.guideCircle = uiCheckBox(user.guideCircle, "Guide Circle", x, y);
+  user.guideLine = uiCheckBox(user.guideLine, "Guide Line", x + 160, y);
+  y = y + 40;
+
+  uiLabel("Blue Width", x, y);
+  user.blueWidthC = round(uiSlider(x + sliderStart, y, sliderWidth, 10, 200, user.blueWidthC));
+  user.blueWidthC = round(uiEditBox(user.blueWidthC, x + sliderStart + sliderWidth + 10, y, 60));
+  y = y + 40;
+
+  uiLabel("Green Width", x, y);
+  user.greenWidthC = round(uiSlider(x + sliderStart, y, sliderWidth, 10, 200, user.greenWidthC));
+  user.greenWidthC = round(uiEditBox(user.greenWidthC, x + sliderStart + sliderWidth + 10, y, 60));
+  y = y + 40;
+
+  uiLabel("Radius", x, y);
+  user.radiusC = round(uiSlider(x + sliderStart, y, sliderWidth, 1, 500, user.radiusC));
+  user.radiusC = round(uiEditBox(user.radiusC, x + sliderStart + sliderWidth + 10, y, 60));
+  y = y + 40;
+
+  uiLabel("Scale", x, y);
+  user.lineScaleC = round(uiSlider(x + sliderStart, y, sliderWidth, 1, 12, user.lineScaleC));
+  user.lineScaleC = round(uiEditBox(user.lineScaleC, x + sliderStart + sliderWidth + 10, y, 60));
+  y = y + 40;
+
+  uiLabel("Offset", x, y);
+  user.offsetC = round(uiSlider(x + sliderStart, y, sliderWidth, -500, 500, user.offsetC));
+  user.offsetC = round(uiEditBox(user.offsetC, x + sliderStart + sliderWidth + 10, y, 60));
+  y = y + 50;
+
+  uiLabel("SETTINGS FOR LINE ACCELMETER", x + 10, y);
+  y = y + 35;
+
+  uiLabel("Blue Width", x, y);
+  user.blueWidthL = round(uiSlider(x + sliderStart, y, sliderWidth, 10, 200, user.blueWidthL));
+  user.blueWidthL = round(uiEditBox(user.blueWidthL, x + sliderStart + sliderWidth + 10, y, 60));
+  y = y + 40;
+
+  uiLabel("Green Width", x, y);
+  user.greenWidthL = round(uiSlider(x + sliderStart, y, sliderWidth, 10, 200, user.greenWidthL));
+  user.greenWidthL = round(uiEditBox(user.greenWidthL, x + sliderStart + sliderWidth + 10, y, 60));
+  y = y + 40;
+
+  uiLabel("Scale", x, y);
+  user.lineScaleL = round(uiSlider(x + sliderStart, y, sliderWidth, 1, 20, user.lineScaleL));
+  user.lineScaleL = round(uiEditBox(user.lineScaleL, x + sliderStart + sliderWidth + 10, y, 60));
+  y = y + 40;
+
+  uiLabel("Offset", x, y);
+  user.offsetL = round(uiSlider(x + sliderStart, y, sliderWidth, -500, 500, user.offsetL));
+  user.offsetL = round(uiEditBox(user.offsetL, x + sliderStart + sliderWidth + 10, y, 60));
+  y = y + 40;
+
+  saveUserData(user);
+end
+
 function rr_AccelMeter:settings()
   consolePerformCommand("ui_show_widget rr_AccelMeter")
   consolePerformCommand("ui_set_widget_anchor rr_AccelMeter 0 0")
-  consolePerformCommand("ui_set_widget_offset rr_AccelMeter 0 " .. radius)
+  consolePerformCommand("ui_set_widget_offset rr_AccelMeter 0 0")
   consolePerformCommand("ui_set_widget_scale rr_AccelMeter 1")
 end
