@@ -72,12 +72,12 @@ end
 -------------------------------------------------------------------------
 
 local function posAngle(angle)
-  angle = math.modf(angle, 360)
+  -- angle = math.modf(angle, 360) -- this causes bad jitter
   if(angle < 0) then angle = angle + 360 end
   return angle
 end
 
-local accel, prevAng, timer, timer2, fps
+local accel, prevAng, timer, timer2
 local playerSpeed = Vector2D.new(0,0)
 local deltaSpeed = Vector2D.new(0,0)
 local playerAccel = Vector2D.new(0,0)
@@ -104,10 +104,14 @@ function rr_AccelMeter:draw()
   local lineScaleL = self.userData.lineScaleL
   local offsetL = self.userData.offsetL
 
+  local fps = consoleGetVariable("com_maxfps")
+  if fps == 0 then fps = 1000 end -- for players who set unlimited fps, we want to avoid a divide by zero
+  if fps < 125 then fps = 125 end -- any lower than this and the accelmeter jitters, so players who set a low maxfps can still have it nice looking
+
   if prevAng == nil then prevAng = specPl.anglesDegrees.x end
   if timer == nil then timer = 0 end
   if timer2 == nil then timer2 = 0 end
-  if fps == nil then fps = 120 end
+  -- if fps == nil then fps = 120 end
   if accel == nil then accel = 0 end
 
   if timer2 >= 1/fps then
