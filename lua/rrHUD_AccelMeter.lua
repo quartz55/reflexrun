@@ -19,14 +19,17 @@ function rr_AccelMeter:initialize()
 
   CheckSetDefaultValue(self.userData, "guideCircle", "boolean", false);
   CheckSetDefaultValue(self.userData, "guideLine", "boolean", false);
+  
   CheckSetDefaultValue(self.userData, "blueWidthC", "number", 50);
   CheckSetDefaultValue(self.userData, "greenWidthC", "number", 50);
+  CheckSetDefaultValue(self.userData, "alphaC", "number", 120);
   CheckSetDefaultValue(self.userData, "radiusC", "number", 100);
   CheckSetDefaultValue(self.userData, "lineScaleC", "number", 1);
   CheckSetDefaultValue(self.userData, "offsetC", "number", 100);
 
   CheckSetDefaultValue(self.userData, "blueWidthL", "number", 35);
   CheckSetDefaultValue(self.userData, "greenWidthL", "number", 35);
+  CheckSetDefaultValue(self.userData, "alphaL", "number", 120);
   CheckSetDefaultValue(self.userData, "lineScaleL", "number", 3);
   CheckSetDefaultValue(self.userData, "offsetL", "number", 0);
 end
@@ -96,11 +99,13 @@ function rr_AccelMeter:draw()
   local guideLine = self.userData.guideLine
   local blueWidthC = self.userData.blueWidthC
   local greenWidthC = self.userData.greenWidthC
+  local alphaC = self.userData.alphaC
   local radiusC = self.userData.radiusC
   local lineScaleC = self.userData.lineScaleC
   local offsetC = self.userData.offsetC
   local blueWidthL = self.userData.blueWidthL
   local greenWidthL = self.userData.greenWidthL
+  local alphaL = self.userData.alphaL
   local lineScaleL = self.userData.lineScaleL
   local offsetL = self.userData.offsetL
 
@@ -202,13 +207,13 @@ function rr_AccelMeter:draw()
     if drawAccelCircle then
       nvgBeginPath()
       nvgArc(0, offsetC, radiusC, ang_diff_min-math.pi/2, ang_diff_op-math.pi/2, dir)
-      nvgStrokeColor(ColorA(PHGPHUD_BLUE_COLOR, 120))
+      nvgStrokeColor(ColorA(PHGPHUD_BLUE_COLOR, alphaC))
       nvgStrokeWidth(blueWidthC)
       if drawBlueLine then nvgStroke() end
 
       nvgBeginPath()
       nvgArc(0, offsetC, radiusC, ang_diff_op_m-math.pi/2, ang_diff_op-math.pi/2, dir)
-      nvgStrokeColor(ColorA(PHGPHUD_GREEN_COLOR, 120))
+      nvgStrokeColor(ColorA(PHGPHUD_GREEN_COLOR, alphaC))
       nvgStrokeWidth(greenWidthC)
       nvgStroke()
     end
@@ -217,14 +222,14 @@ function rr_AccelMeter:draw()
       nvgBeginPath()
       nvgMoveTo(cgazB1, offsetL)
       nvgLineTo(cgazB2, offsetL)
-      nvgStrokeColor(ColorA(PHGPHUD_BLUE_COLOR, 120))
+      nvgStrokeColor(ColorA(PHGPHUD_BLUE_COLOR, alphaL))
       nvgStrokeWidth(blueWidthL)
       if drawBlueLine then nvgStroke() end
 
       nvgBeginPath()
       nvgMoveTo(cgazG1, offsetL)
       nvgLineTo(cgazG2, offsetL)
-      nvgStrokeColor(ColorA(PHGPHUD_GREEN_COLOR, 120))
+      nvgStrokeColor(ColorA(PHGPHUD_GREEN_COLOR, alphaL))
       nvgStrokeWidth(greenWidthL)
       nvgStroke()
     end
@@ -294,12 +299,14 @@ function rr_AccelMeter:drawOptions(x, y)
 
     user.blueWidthC = 50;
     user.greenWidthC = 50;
+    user.alphaC = 120;
     user.radiusC = 100;
     user.lineScaleC = 1;
     user.offsetC = 100;
 
     user.blueWidthL = 35;
     user.greenWidthL = 35;
+    user.alphaL = 120;
     user.lineScaleL = 3;
     user.offsetL = 0;
   end
@@ -327,6 +334,11 @@ function rr_AccelMeter:drawOptions(x, y)
   uiLabel("Green Width", x, y);
   user.greenWidthC = round(uiSlider(x + sliderStart, y, sliderWidth, 10, 200, user.greenWidthC));
   user.greenWidthC = round(uiEditBox(user.greenWidthC, x + sliderStart + sliderWidth + 10, y, 60));
+  y = y + 40;
+
+  uiLabel("Alpha", x, y);
+  user.alphaC = round(uiSlider(x + sliderStart, y, sliderWidth, 0, 255, user.alphaC));
+  user.alphaC = round(uiEditBox(user.alphaC, x + sliderStart + sliderWidth + 10, y, 60));
   y = y + 40;
 
   uiLabel("Radius", x, y);
@@ -357,6 +369,11 @@ function rr_AccelMeter:drawOptions(x, y)
   user.greenWidthL = round(uiEditBox(user.greenWidthL, x + sliderStart + sliderWidth + 10, y, 60));
   y = y + 40;
 
+  uiLabel("Alpha", x, y);
+  user.alphaL = round(uiSlider(x + sliderStart, y, sliderWidth, 0, 255, user.alphaL));
+  user.alphaL = round(uiEditBox(user.alphaL, x + sliderStart + sliderWidth + 10, y, 60));
+  y = y + 40;
+
   uiLabel("Scale", x, y);
   user.lineScaleL = round(uiSlider(x + sliderStart, y, sliderWidth, 1, 20, user.lineScaleL));
   user.lineScaleL = round(uiEditBox(user.lineScaleL, x + sliderStart + sliderWidth + 10, y, 60));
@@ -368,6 +385,10 @@ function rr_AccelMeter:drawOptions(x, y)
   y = y + 40;
 
   saveUserData(user);
+end
+
+function rr_AccelMeter:getOptionsHeight()
+	return 650; -- debug with: ui_optionsmenu_show_properties_height 1
 end
 
 function rr_AccelMeter:settings()
