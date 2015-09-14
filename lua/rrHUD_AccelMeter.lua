@@ -5,6 +5,24 @@ rr_AccelMeter =
     canPosition = false; -- hide default widget sliders
 
     userData = {};
+    defaultData = {
+      drawAccelCircle = true;
+      drawAccelLine = false;
+      drawBlueLine = true;
+      guideCircle = false;
+      guideLine = false;
+      blueWidthC = 50;
+      greenWidthC = 50;
+      alphaC = 120;
+      radiusC = 100;
+      lineScaleC = 1;
+      offsetC = 100;
+      blueWidthL = 35;
+      greenWidthL = 35;
+      alphaL = 120;
+      lineScaleL = 3;
+      offsetL = 0;
+    };
   };
 registerWidget("rr_AccelMeter");
 
@@ -13,25 +31,25 @@ function rr_AccelMeter:initialize()
 
   CheckSetDefaultValue(self, "userData", "table", {});
 
-  CheckSetDefaultValue(self.userData, "drawAccelCircle", "boolean", true);
-  CheckSetDefaultValue(self.userData, "drawAccelLine", "boolean", false);
-  CheckSetDefaultValue(self.userData, "drawBlueLine", "boolean", true);
+  CheckSetDefaultValue(self.userData, "drawAccelCircle", "boolean", self.defaultData.drawAccelCircle);
+  CheckSetDefaultValue(self.userData, "drawAccelLine", "boolean", self.defaultData.drawAccelLine);
+  CheckSetDefaultValue(self.userData, "drawBlueLine", "boolean", self.defaultData.drawBlueLine);
 
-  CheckSetDefaultValue(self.userData, "guideCircle", "boolean", false);
-  CheckSetDefaultValue(self.userData, "guideLine", "boolean", false);
+  CheckSetDefaultValue(self.userData, "guideCircle", "boolean", self.defaultData.guideCircle);
+  CheckSetDefaultValue(self.userData, "guideLine", "boolean", self.defaultData.guideLine);
   
-  CheckSetDefaultValue(self.userData, "blueWidthC", "number", 50);
-  CheckSetDefaultValue(self.userData, "greenWidthC", "number", 50);
-  CheckSetDefaultValue(self.userData, "alphaC", "number", 120);
-  CheckSetDefaultValue(self.userData, "radiusC", "number", 100);
-  CheckSetDefaultValue(self.userData, "lineScaleC", "number", 1);
-  CheckSetDefaultValue(self.userData, "offsetC", "number", 100);
+  CheckSetDefaultValue(self.userData, "blueWidthC", "number", self.defaultData.blueWidthC);
+  CheckSetDefaultValue(self.userData, "greenWidthC", "number", self.defaultData.greenWidthC);
+  CheckSetDefaultValue(self.userData, "alphaC", "number", self.defaultData.alphaC);
+  CheckSetDefaultValue(self.userData, "radiusC", "number", self.defaultData.radiusC);
+  CheckSetDefaultValue(self.userData, "lineScaleC", "number", self.defaultData.lineScaleC);
+  CheckSetDefaultValue(self.userData, "offsetC", "number", self.defaultData.offsetC);
 
-  CheckSetDefaultValue(self.userData, "blueWidthL", "number", 35);
-  CheckSetDefaultValue(self.userData, "greenWidthL", "number", 35);
-  CheckSetDefaultValue(self.userData, "alphaL", "number", 120);
-  CheckSetDefaultValue(self.userData, "lineScaleL", "number", 3);
-  CheckSetDefaultValue(self.userData, "offsetL", "number", 0);
+  CheckSetDefaultValue(self.userData, "blueWidthL", "number", self.defaultData.blueWidthL);
+  CheckSetDefaultValue(self.userData, "greenWidthL", "number", self.defaultData.greenWidthL);
+  CheckSetDefaultValue(self.userData, "alphaL", "number", self.defaultData.alphaL);
+  CheckSetDefaultValue(self.userData, "lineScaleL", "number", self.defaultData.lineScaleL);
+  CheckSetDefaultValue(self.userData, "offsetL", "number", self.defaultData.offsetL);
 end
 
 -------------------------------------------------------------------------
@@ -199,6 +217,9 @@ function rr_AccelMeter:draw()
   local cgazG1 = (radiusC * math.cos(ang_diff_op_m-math.pi/2)) * lineScaleL
   local cgazG2 = (radiusC * math.cos(ang_diff_op-math.pi/2)) * lineScaleL
 
+  local guideCircleWidth = 6
+  local guideLineWidth = 4
+
   ang_diff_min = ang_diff_min * lineScaleC
   ang_diff_op_m = ang_diff_op_m * lineScaleC
   ang_diff_op = ang_diff_op * lineScaleC
@@ -238,9 +259,9 @@ function rr_AccelMeter:draw()
   -- Guide Circle
   if guideCircle and drawAccelCircle then
     nvgBeginPath()
-    nvgCircle(0, offsetC, radiusC + blueWidthC/2 + 3)
     nvgStrokeColor(ColorA(PHGPHUD_BLUE_COLOR, 80))
-    nvgStrokeWidth(6)
+    nvgStrokeWidth(guideCircleWidth)
+    nvgCircle(0, offsetC, radiusC + blueWidthC/2 + guideCircleWidth/2)
     nvgStroke()
   end
 
@@ -248,9 +269,15 @@ function rr_AccelMeter:draw()
   if guideLine and drawAccelCircle then
     nvgBeginPath()
     nvgStrokeColor(ColorA(PHGPHUD_RED_COLOR, 120))
-    nvgStrokeWidth(6)
-    nvgMoveTo(0, offsetC + -radiusC - blueWidthC/2 - 8)
-    nvgLineTo(0, offsetC + -radiusC - blueWidthC/2 + 12)
+    nvgStrokeWidth(guideLineWidth)
+    nvgMoveTo(0, offsetC + -radiusC - greenWidthC/2)
+    nvgLineTo(0, offsetC + -radiusC - greenWidthC/6)
+
+    nvgMoveTo(0, offsetC + -radiusC - greenWidthC/16)
+    nvgLineTo(0, offsetC + -radiusC + greenWidthC/16)
+
+    nvgMoveTo(0, offsetC + -radiusC + greenWidthC/2)
+    nvgLineTo(0, offsetC + -radiusC + greenWidthC/6)
     nvgStroke()
   end
 
@@ -287,29 +314,12 @@ function rr_AccelMeter:drawOptions(x, y)
   local sliderWidth = 200;
   local sliderStart = 140;
 
-  local user = self.userData;
-
   if uiButton("Reset Settings", nil, x + 250, y - 35, 150, UI_DEFAULT_BUTTON_HEIGHT, PHGPHUD_RED_COLOR) then
-    user.drawAccelCircle = true;
-    user.drawAccelLine = false;
-    user.drawBlueLine = true;
-
-    user.guideCircle = false;
-    user.guideLine = false;
-
-    user.blueWidthC = 50;
-    user.greenWidthC = 50;
-    user.alphaC = 120;
-    user.radiusC = 100;
-    user.lineScaleC = 1;
-    user.offsetC = 100;
-
-    user.blueWidthL = 35;
-    user.greenWidthL = 35;
-    user.alphaL = 120;
-    user.lineScaleL = 3;
-    user.offsetL = 0;
+    self.userData = {};
+    self.userData = shallowCopy(self.defaultData);
   end
+
+  local user = self.userData;
 
   uiLabel("DRAW ACCELMETER AS", x + 10, y);
   y = y + 35;
