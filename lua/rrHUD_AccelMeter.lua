@@ -212,10 +212,10 @@ function rr_AccelMeter:draw()
   local dir = NVG_CW
   if ang_diff_min < ang_diff_op then dir = NVG_CW else dir = NVG_CCW end
 
-  local cgazB1 = (radiusC * math.cos(ang_diff_min-math.pi/2)) * lineScaleL
-  local cgazB2 = (radiusC * math.cos(ang_diff_op-math.pi/2)) * lineScaleL
-  local cgazG1 = (radiusC * math.cos(ang_diff_op_m-math.pi/2)) * lineScaleL
-  local cgazG2 = (radiusC * math.cos(ang_diff_op-math.pi/2)) * lineScaleL
+  local cgazB1 = (self.defaultData.radiusC * math.cos(ang_diff_min-math.pi/2)) * lineScaleL
+  local cgazB2 = (self.defaultData.radiusC * math.cos(ang_diff_op-math.pi/2)) * lineScaleL
+  local cgazG1 = (self.defaultData.radiusC * math.cos(ang_diff_op_m-math.pi/2)) * lineScaleL
+  local cgazG2 = (self.defaultData.radiusC * math.cos(ang_diff_op-math.pi/2)) * lineScaleL
 
   local guideCircleWidth = 6
   local guideLineWidth = 4
@@ -259,7 +259,7 @@ function rr_AccelMeter:draw()
   -- Guide Circle
   if guideCircle and drawAccelCircle then
     nvgBeginPath()
-    nvgStrokeColor(ColorA(PHGPHUD_BLUE_COLOR, 80))
+    nvgStrokeLinearGradient(0, -(radiusC + blueWidthC/2 + guideCircleWidth/2 - offsetC), 0, -(radiusC/1.33 + blueWidthC/2 + guideCircleWidth/2 - offsetC), ColorA(PHGPHUD_BLUE_COLOR, alphaC), ColorA(PHGPHUD_BLUE_COLOR, 0))
     nvgStrokeWidth(guideCircleWidth)
     nvgCircle(0, offsetC, radiusC + blueWidthC/2 + guideCircleWidth/2)
     nvgStroke()
@@ -268,7 +268,7 @@ function rr_AccelMeter:draw()
   -- Guide Line
   if guideLine and drawAccelCircle then
     nvgBeginPath()
-    nvgStrokeColor(ColorA(PHGPHUD_RED_COLOR, 120))
+    nvgStrokeColor(ColorA(PHGPHUD_RED_COLOR, 190))
     nvgStrokeWidth(guideLineWidth)
     nvgMoveTo(0, offsetC + -radiusC - greenWidthC/2)
     nvgLineTo(0, offsetC + -radiusC - greenWidthC/6)
@@ -332,8 +332,8 @@ function rr_AccelMeter:drawOptions(x, y)
   uiLabel("SETTINGS FOR CIRCULAR ACCELMETER", x + 10, y);
   y = y + 35;
 
-  user.guideCircle = uiCheckBox(user.guideCircle, "Guide Circle", x, y);
-  user.guideLine = uiCheckBox(user.guideLine, "Guide Line", x + 160, y);
+  user.guideCircle = uiCheckBox(user.guideCircle, "Guide Arc", x, y);
+  user.guideLine = uiCheckBox(user.guideLine, "Guide Line", x + 140, y);
   y = y + 40;
 
   uiLabel("Blue Width", x, y);
