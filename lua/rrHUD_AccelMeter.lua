@@ -9,6 +9,7 @@ rr_AccelMeter =
       drawAccelCircle = true;
       drawAccelLine = false;
       drawBlueLine = true;
+      latencyWorkaround = false;
       guideCircle = false;
       guideLine = false;
       blueWidthC = 50;
@@ -34,7 +35,7 @@ function rr_AccelMeter:initialize()
   CheckSetDefaultValue(self.userData, "drawAccelCircle", "boolean", self.defaultData.drawAccelCircle);
   CheckSetDefaultValue(self.userData, "drawAccelLine", "boolean", self.defaultData.drawAccelLine);
   CheckSetDefaultValue(self.userData, "drawBlueLine", "boolean", self.defaultData.drawBlueLine);
-
+  CheckSetDefaultValue(self.userData, "latencyWorkaround", "boolean", self.defaultData.latencyWorkaround);
   CheckSetDefaultValue(self.userData, "guideCircle", "boolean", self.defaultData.guideCircle);
   CheckSetDefaultValue(self.userData, "guideLine", "boolean", self.defaultData.guideLine);
   
@@ -103,6 +104,40 @@ local playerSpeed = Vector2D.new(0,0)
 local deltaSpeed = Vector2D.new(0,0)
 local playerAccel = Vector2D.new(0,0)
 
+function rr_AccelMeter:drawAC(ang_diff_min, ang_diff_op, ang_diff_op_m, dir)
+  if self.userData.drawAccelCircle then
+    nvgBeginPath()
+    nvgArc(0, self.userData.offsetC, self.userData.radiusC, ang_diff_min-math.pi/2, ang_diff_op-math.pi/2, dir)
+    nvgStrokeColor(ColorA(PHGPHUD_BLUE_COLOR, self.userData.alphaC))
+    nvgStrokeWidth(self.userData.blueWidthC)
+    if self.userData.drawBlueLine then nvgStroke() end
+
+    nvgBeginPath()
+    nvgArc(0, self.userData.offsetC, self.userData.radiusC, ang_diff_op_m-math.pi/2, ang_diff_op-math.pi/2, dir)
+    nvgStrokeColor(ColorA(PHGPHUD_GREEN_COLOR, self.userData.alphaC))
+    nvgStrokeWidth(self.userData.greenWidthC)
+    nvgStroke()
+  end
+end
+
+function rr_AccelMeter:drawAL(cgazB1, cgazB2, cgazG1, cgazG2)
+  if self.userData.drawAccelLine then
+    nvgBeginPath()
+    nvgMoveTo(cgazB1, self.userData.offsetL)
+    nvgLineTo(cgazB2, self.userData.offsetL)
+    nvgStrokeColor(ColorA(PHGPHUD_BLUE_COLOR, self.userData.alphaL))
+    nvgStrokeWidth(self.userData.blueWidthL)
+    if self.userData.drawBlueLine then nvgStroke() end
+
+    nvgBeginPath()
+    nvgMoveTo(cgazG1, self.userData.offsetL)
+    nvgLineTo(cgazG2, self.userData.offsetL)
+    nvgStrokeColor(ColorA(PHGPHUD_GREEN_COLOR, self.userData.alphaL))
+    nvgStrokeWidth(self.userData.greenWidthL)
+    nvgStroke()
+  end
+end
+
 function rr_AccelMeter:draw()
 
   if not shouldShowHUD() then return end
@@ -111,8 +146,7 @@ function rr_AccelMeter:draw()
   local specPl = getPlayer()
 
   local drawAccelCircle = self.userData.drawAccelCircle
-  local drawAccelLine = self.userData.drawAccelLine
-  local drawBlueLine = self.userData.drawBlueLine
+  local latencyWorkaround = self.userData.latencyWorkaround
   local guideCircle = self.userData.guideCircle
   local guideLine = self.userData.guideLine
   local blueWidthC = self.userData.blueWidthC
@@ -121,11 +155,7 @@ function rr_AccelMeter:draw()
   local radiusC = self.userData.radiusC
   local lineScaleC = self.userData.lineScaleC
   local offsetC = self.userData.offsetC
-  local blueWidthL = self.userData.blueWidthL
-  local greenWidthL = self.userData.greenWidthL
-  local alphaL = self.userData.alphaL
   local lineScaleL = self.userData.lineScaleL
-  local offsetL = self.userData.offsetL
 
   local fps = consoleGetVariable("com_maxfps")
   if fps == 0 then fps = 1000 end -- for players who set unlimited fps, we want to avoid a divide by zero
@@ -170,7 +200,7 @@ function rr_AccelMeter:draw()
   if playerSpeed.y >= 0 then vel_ang = playerSpeed:angle(vec_nx)
   else vel_ang = math.pi + playerSpeed:angle(vec_x) end
 
-  if specPl.buttons.back then  -- Backwards strafe jumping
+  if (not latencyWorkaround) and specPl.buttons.back then -- Backwards strafe jumping
     vel_ang = -vel_ang
     pl_ang = -pl_ang + 180
   end
@@ -184,19 +214,23 @@ function rr_AccelMeter:draw()
   local t_ang_op_m = vel_ang
   local t_ang_op = vel_ang
 
-  if specPl.buttons.right then
-    t_ang_op_m = t_ang_op + 1*e
-    t_ang_op = t_ang_op + 1.2*e
-  elseif specPl.buttons.left then
-    t_ang_op_m = t_ang_op - 1*e
-    t_ang_op = t_ang_op - 1.2*e
+  if latencyWorkaround then
+    if (specPl.anglesDegrees.x - prevAng) > 0 then
+      t_ang_op_m = t_ang_op + 1*e
+      t_ang_op = t_ang_op + 1.2*e
+    elseif (specPl.anglesDegrees.x - prevAng) < 0 then
+      t_ang_op_m = t_ang_op - 1*e
+      t_ang_op = t_ang_op - 1.2*e
+    end
+  else
+    if specPl.buttons.right then
+      t_ang_op_m = t_ang_op + 1*e
+      t_ang_op = t_ang_op + 1.2*e
+    elseif specPl.buttons.left then
+      t_ang_op_m = t_ang_op - 1*e
+      t_ang_op = t_ang_op - 1.2*e
+    end
   end
-
-  -- if specPl.anglesDegrees.x-prevAng > 0 then
-  --   t_ang_op = t_ang_op + 1.2*e
-  -- elseif specPl.anglesDegrees.x-prevAng < 0 then
-  --   t_ang_op = t_ang_op - 1.2*e
-  -- end
 
   if timer >= 1/10 then
     timer = 0
@@ -224,36 +258,22 @@ function rr_AccelMeter:draw()
   ang_diff_op_m = ang_diff_op_m * lineScaleC
   ang_diff_op = ang_diff_op * lineScaleC
 
-  if specPl.buttons.forward or specPl.buttons.back then
-    if drawAccelCircle then
-      nvgBeginPath()
-      nvgArc(0, offsetC, radiusC, ang_diff_min-math.pi/2, ang_diff_op-math.pi/2, dir)
-      nvgStrokeColor(ColorA(PHGPHUD_BLUE_COLOR, alphaC))
-      nvgStrokeWidth(blueWidthC)
-      if drawBlueLine then nvgStroke() end
+  if latencyWorkaround and specPl.buttons.back then -- Backwards strafe jumping (high ping fix)
+    if dir == NVG_CW then dir = NVG_CCW
+    else dir = NVG_CW end
 
-      nvgBeginPath()
-      nvgArc(0, offsetC, radiusC, ang_diff_op_m-math.pi/2, ang_diff_op-math.pi/2, dir)
-      nvgStrokeColor(ColorA(PHGPHUD_GREEN_COLOR, alphaC))
-      nvgStrokeWidth(greenWidthC)
-      nvgStroke()
-    end
+    ang_diff_min = -ang_diff_min + math.rad(180)
+    ang_diff_op_m = -ang_diff_op_m + math.rad(180)
+    ang_diff_op = -ang_diff_op + math.rad(180)
+  end
 
-    if drawAccelLine then
-      nvgBeginPath()
-      nvgMoveTo(cgazB1, offsetL)
-      nvgLineTo(cgazB2, offsetL)
-      nvgStrokeColor(ColorA(PHGPHUD_BLUE_COLOR, alphaL))
-      nvgStrokeWidth(blueWidthL)
-      if drawBlueLine then nvgStroke() end
-
-      nvgBeginPath()
-      nvgMoveTo(cgazG1, offsetL)
-      nvgLineTo(cgazG2, offsetL)
-      nvgStrokeColor(ColorA(PHGPHUD_GREEN_COLOR, alphaL))
-      nvgStrokeWidth(greenWidthL)
-      nvgStroke()
-    end
+  -- Draw Accelmeter
+  if latencyWorkaround then
+    self:drawAC(ang_diff_min, ang_diff_op, ang_diff_op_m, dir)
+    self:drawAL(cgazB1, cgazB2, cgazG1, cgazG2)
+  elseif specPl.buttons.forward or specPl.buttons.back then
+    self:drawAC(ang_diff_min, ang_diff_op, ang_diff_op_m, dir)
+    self:drawAL(cgazB1, cgazB2, cgazG1, cgazG2)
   end
 
   -- Guide Circle
@@ -314,7 +334,7 @@ function rr_AccelMeter:drawOptions(x, y)
   local sliderWidth = 200;
   local sliderStart = 140;
 
-  if uiButton("Reset Settings", nil, x + 250, y - 35, 150, UI_DEFAULT_BUTTON_HEIGHT, PHGPHUD_RED_COLOR) then
+  if uiButton("Reset Settings", nil, x + 250, y - 5, 150, UI_DEFAULT_BUTTON_HEIGHT, PHGPHUD_RED_COLOR) then
     self.userData = {};
     self.userData = shallowCopy(self.defaultData);
   end
@@ -327,6 +347,8 @@ function rr_AccelMeter:drawOptions(x, y)
   user.drawAccelCircle = uiCheckBox(user.drawAccelCircle, "Circle", x, y);
   user.drawAccelLine = uiCheckBox(user.drawAccelLine, "Line", x + 100, y);
   user.drawBlueLine = uiCheckBox(user.drawBlueLine, "With Blue Area", x + 220, y);
+  y = y + 35;
+  user.latencyWorkaround = uiCheckBox(user.latencyWorkaround, "High Ping Fix", x, y);
   y = y + 50;
 
   uiLabel("SETTINGS FOR CIRCULAR ACCELMETER", x + 10, y);
@@ -398,7 +420,7 @@ function rr_AccelMeter:drawOptions(x, y)
 end
 
 function rr_AccelMeter:getOptionsHeight()
-	return 650; -- debug with: ui_optionsmenu_show_properties_height 1
+	return 700; -- debug with: ui_optionsmenu_show_properties_height 1
 end
 
 function rr_AccelMeter:settings()
