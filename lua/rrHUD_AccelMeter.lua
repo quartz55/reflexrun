@@ -12,17 +12,20 @@ rr_AccelMeter =
       latencyWorkaround = false;
       guideCircle = false;
       guideLine = false;
+      invertC = false;
       blueWidthC = 50;
       greenWidthC = 50;
-      alphaC = 120;
       radiusC = 100;
       lineScaleC = 1;
       offsetC = 100;
       blueWidthL = 35;
       greenWidthL = 35;
-      alphaL = 120;
       lineScaleL = 3;
       offsetL = 0;
+      cBlue1 = shallowCopy(ColorA(PHGPHUD_BLUE_COLOR, 120));
+      cBlue2 = shallowCopy(ColorA(PHGPHUD_BLUE_COLOR, 120));
+      cGreen1 = shallowCopy(ColorA(PHGPHUD_GREEN_COLOR, 120));
+      cGreen2 = shallowCopy(ColorA(PHGPHUD_GREEN_COLOR, 120));
     };
   };
 registerWidget("rr_AccelMeter");
@@ -36,21 +39,26 @@ function rr_AccelMeter:initialize()
   CheckSetDefaultValue(self.userData, "drawAccelLine", "boolean", self.defaultData.drawAccelLine);
   CheckSetDefaultValue(self.userData, "drawBlueLine", "boolean", self.defaultData.drawBlueLine);
   CheckSetDefaultValue(self.userData, "latencyWorkaround", "boolean", self.defaultData.latencyWorkaround);
+
   CheckSetDefaultValue(self.userData, "guideCircle", "boolean", self.defaultData.guideCircle);
   CheckSetDefaultValue(self.userData, "guideLine", "boolean", self.defaultData.guideLine);
+  CheckSetDefaultValue(self.userData, "invertC", "boolean", self.defaultData.invertC);
   
   CheckSetDefaultValue(self.userData, "blueWidthC", "number", self.defaultData.blueWidthC);
   CheckSetDefaultValue(self.userData, "greenWidthC", "number", self.defaultData.greenWidthC);
-  CheckSetDefaultValue(self.userData, "alphaC", "number", self.defaultData.alphaC);
   CheckSetDefaultValue(self.userData, "radiusC", "number", self.defaultData.radiusC);
   CheckSetDefaultValue(self.userData, "lineScaleC", "number", self.defaultData.lineScaleC);
   CheckSetDefaultValue(self.userData, "offsetC", "number", self.defaultData.offsetC);
 
   CheckSetDefaultValue(self.userData, "blueWidthL", "number", self.defaultData.blueWidthL);
   CheckSetDefaultValue(self.userData, "greenWidthL", "number", self.defaultData.greenWidthL);
-  CheckSetDefaultValue(self.userData, "alphaL", "number", self.defaultData.alphaL);
   CheckSetDefaultValue(self.userData, "lineScaleL", "number", self.defaultData.lineScaleL);
   CheckSetDefaultValue(self.userData, "offsetL", "number", self.defaultData.offsetL);
+
+  CheckSetDefaultValue(self.userData, "cBlue1", "table", shallowCopy(self.defaultData.cBlue1));
+  CheckSetDefaultValue(self.userData, "cBlue2", "table", shallowCopy(self.defaultData.cBlue2));
+  CheckSetDefaultValue(self.userData, "cGreen1", "table", shallowCopy(self.defaultData.cGreen1));
+  CheckSetDefaultValue(self.userData, "cGreen2", "table", shallowCopy(self.defaultData.cGreen2));
 end
 
 -------------------------------------------------------------------------
@@ -105,16 +113,25 @@ local deltaSpeed = Vector2D.new(0,0)
 local playerAccel = Vector2D.new(0,0)
 
 function rr_AccelMeter:drawAC(ang_diff_min, ang_diff_op, ang_diff_op_m, dir)
+  local colourB_X1 = self.userData.radiusC * math.cos(ang_diff_min-math.pi/2)
+  local colourB_X2 = self.userData.radiusC * math.cos(ang_diff_op-math.pi/2)
+  local colourB_Y1 = self.userData.radiusC * math.sin(ang_diff_min-math.pi/2) + self.userData.offsetC
+  local colourB_Y2 = self.userData.radiusC * math.sin(ang_diff_op-math.pi/2) + self.userData.offsetC
+  local colourG_X1 = self.userData.radiusC * math.cos(ang_diff_op_m-math.pi/2)
+  local colourG_X2 = self.userData.radiusC * math.cos(ang_diff_op-math.pi/2)
+  local colourG_Y1 = self.userData.radiusC * math.sin(ang_diff_op_m-math.pi/2) + self.userData.offsetC
+  local colourG_Y2 = self.userData.radiusC * math.sin(ang_diff_op-math.pi/2) + self.userData.offsetC
+
   if self.userData.drawAccelCircle then
     nvgBeginPath()
     nvgArc(0, self.userData.offsetC, self.userData.radiusC, ang_diff_min-math.pi/2, ang_diff_op-math.pi/2, dir)
-    nvgStrokeColor(ColorA(PHGPHUD_BLUE_COLOR, self.userData.alphaC))
+    nvgStrokeLinearGradient(colourB_X1, colourB_Y1, colourB_X2, colourB_Y2, self.userData.cBlue2, self.userData.cBlue1)
     nvgStrokeWidth(self.userData.blueWidthC)
     if self.userData.drawBlueLine then nvgStroke() end
 
     nvgBeginPath()
     nvgArc(0, self.userData.offsetC, self.userData.radiusC, ang_diff_op_m-math.pi/2, ang_diff_op-math.pi/2, dir)
-    nvgStrokeColor(ColorA(PHGPHUD_GREEN_COLOR, self.userData.alphaC))
+    nvgStrokeLinearGradient(colourG_X1, colourG_Y1, colourG_X2, colourG_Y2, self.userData.cGreen2, self.userData.cGreen1)
     nvgStrokeWidth(self.userData.greenWidthC)
     nvgStroke()
   end
@@ -125,14 +142,14 @@ function rr_AccelMeter:drawAL(cgazB1, cgazB2, cgazG1, cgazG2)
     nvgBeginPath()
     nvgMoveTo(cgazB1, self.userData.offsetL)
     nvgLineTo(cgazB2, self.userData.offsetL)
-    nvgStrokeColor(ColorA(PHGPHUD_BLUE_COLOR, self.userData.alphaL))
+    nvgStrokeLinearGradient(cgazB1, 0, cgazB2, 0, self.userData.cBlue2, self.userData.cBlue1)
     nvgStrokeWidth(self.userData.blueWidthL)
     if self.userData.drawBlueLine then nvgStroke() end
 
     nvgBeginPath()
     nvgMoveTo(cgazG1, self.userData.offsetL)
     nvgLineTo(cgazG2, self.userData.offsetL)
-    nvgStrokeColor(ColorA(PHGPHUD_GREEN_COLOR, self.userData.alphaL))
+    nvgStrokeLinearGradient(cgazG1, 0, cgazG2, 0, self.userData.cGreen2, self.userData.cGreen1)
     nvgStrokeWidth(self.userData.greenWidthL)
     nvgStroke()
   end
@@ -149,9 +166,9 @@ function rr_AccelMeter:draw()
   local latencyWorkaround = self.userData.latencyWorkaround
   local guideCircle = self.userData.guideCircle
   local guideLine = self.userData.guideLine
+  local invertC = self.userData.invertC
   local blueWidthC = self.userData.blueWidthC
   local greenWidthC = self.userData.greenWidthC
-  local alphaC = self.userData.alphaC
   local radiusC = self.userData.radiusC
   local lineScaleC = self.userData.lineScaleC
   local offsetC = self.userData.offsetC
@@ -258,13 +275,22 @@ function rr_AccelMeter:draw()
   ang_diff_op_m = ang_diff_op_m * lineScaleC
   ang_diff_op = ang_diff_op * lineScaleC
 
-  if latencyWorkaround and specPl.buttons.back then -- Backwards strafe jumping (high ping fix)
+  if invertC then
     if dir == NVG_CW then dir = NVG_CCW
     else dir = NVG_CW end
 
     ang_diff_min = -ang_diff_min + math.rad(180)
     ang_diff_op_m = -ang_diff_op_m + math.rad(180)
     ang_diff_op = -ang_diff_op + math.rad(180)
+  end
+
+  if latencyWorkaround and specPl.buttons.back then -- Backwards strafe jumping (high ping fix)
+    if dir == NVG_CW then dir = NVG_CCW
+    else dir = NVG_CW end
+
+    ang_diff_min = -ang_diff_min
+    ang_diff_op_m = -ang_diff_op_m
+    ang_diff_op = -ang_diff_op
   end
 
   -- Draw Accelmeter
@@ -279,7 +305,11 @@ function rr_AccelMeter:draw()
   -- Guide Circle
   if guideCircle and drawAccelCircle then
     nvgBeginPath()
-    nvgStrokeLinearGradient(0, -(radiusC + blueWidthC/2 + guideCircleWidth/2 - offsetC), 0, -(radiusC/1.33 + blueWidthC/2 + guideCircleWidth/2 - offsetC), ColorA(PHGPHUD_BLUE_COLOR, alphaC), ColorA(PHGPHUD_BLUE_COLOR, 0))
+    if invertC then
+      nvgStrokeLinearGradient(0, (radiusC + blueWidthC/2 + guideCircleWidth/2 + offsetC), 0, (radiusC/1.33 + blueWidthC/2 + guideCircleWidth/2 + offsetC), ColorA(PHGPHUD_BLUE_COLOR, 120), ColorA(PHGPHUD_BLUE_COLOR, 0))
+    else
+      nvgStrokeLinearGradient(0, -(radiusC + blueWidthC/2 + guideCircleWidth/2 - offsetC), 0, -(radiusC/1.33 + blueWidthC/2 + guideCircleWidth/2 - offsetC), ColorA(PHGPHUD_BLUE_COLOR, 120), ColorA(PHGPHUD_BLUE_COLOR, 0))
+    end
     nvgStrokeWidth(guideCircleWidth)
     nvgCircle(0, offsetC, radiusC + blueWidthC/2 + guideCircleWidth/2)
     nvgStroke()
@@ -290,14 +320,26 @@ function rr_AccelMeter:draw()
     nvgBeginPath()
     nvgStrokeColor(ColorA(PHGPHUD_RED_COLOR, 190))
     nvgStrokeWidth(guideLineWidth)
-    nvgMoveTo(0, offsetC + -radiusC - greenWidthC/2)
-    nvgLineTo(0, offsetC + -radiusC - greenWidthC/6)
+    if invertC then
+      nvgMoveTo(0, offsetC + radiusC - greenWidthC/2)
+      nvgLineTo(0, offsetC + radiusC - greenWidthC/6)
 
-    nvgMoveTo(0, offsetC + -radiusC - greenWidthC/16)
-    nvgLineTo(0, offsetC + -radiusC + greenWidthC/16)
+      nvgMoveTo(0, offsetC + radiusC - greenWidthC/16)
+      nvgLineTo(0, offsetC + radiusC + greenWidthC/16)
 
-    nvgMoveTo(0, offsetC + -radiusC + greenWidthC/2)
-    nvgLineTo(0, offsetC + -radiusC + greenWidthC/6)
+      nvgMoveTo(0, offsetC + radiusC + greenWidthC/2)
+      nvgLineTo(0, offsetC + radiusC + greenWidthC/6)
+    else
+      nvgMoveTo(0, offsetC + -radiusC - greenWidthC/2)
+      nvgLineTo(0, offsetC + -radiusC - greenWidthC/6)
+
+      nvgMoveTo(0, offsetC + -radiusC - greenWidthC/16)
+      nvgLineTo(0, offsetC + -radiusC + greenWidthC/16)
+
+      nvgMoveTo(0, offsetC + -radiusC + greenWidthC/2)
+      nvgLineTo(0, offsetC + -radiusC + greenWidthC/6)
+    end
+
     nvgStroke()
   end
 
@@ -336,7 +378,7 @@ function rr_AccelMeter:drawOptions(x, y)
 
   if uiButton("Reset Settings", nil, x + 250, y - 5, 150, UI_DEFAULT_BUTTON_HEIGHT, PHGPHUD_RED_COLOR) then
     self.userData = {};
-    self.userData = shallowCopy(self.defaultData);
+    self.userData = deepCopy(self.defaultData);
   end
 
   local user = self.userData;
@@ -356,6 +398,7 @@ function rr_AccelMeter:drawOptions(x, y)
 
   user.guideCircle = uiCheckBox(user.guideCircle, "Guide Arc", x, y);
   user.guideLine = uiCheckBox(user.guideLine, "Guide Line", x + 140, y);
+  user.invertC = uiCheckBox(user.invertC, "Invert", x + 300, y);
   y = y + 40;
 
   uiLabel("Blue Width", x, y);
@@ -368,13 +411,8 @@ function rr_AccelMeter:drawOptions(x, y)
   user.greenWidthC = round(uiEditBox(user.greenWidthC, x + sliderStart + sliderWidth + 10, y, 60));
   y = y + 40;
 
-  uiLabel("Alpha", x, y);
-  user.alphaC = round(uiSlider(x + sliderStart, y, sliderWidth, 0, 255, user.alphaC));
-  user.alphaC = round(uiEditBox(user.alphaC, x + sliderStart + sliderWidth + 10, y, 60));
-  y = y + 40;
-
   uiLabel("Radius", x, y);
-  user.radiusC = round(uiSlider(x + sliderStart, y, sliderWidth, 1, 500, user.radiusC));
+  user.radiusC = round(uiSlider(x + sliderStart, y, sliderWidth, 1, 1000, user.radiusC));
   user.radiusC = round(uiEditBox(user.radiusC, x + sliderStart + sliderWidth + 10, y, 60));
   y = y + 40;
 
@@ -384,7 +422,7 @@ function rr_AccelMeter:drawOptions(x, y)
   y = y + 40;
 
   uiLabel("Offset", x, y);
-  user.offsetC = round(uiSlider(x + sliderStart, y, sliderWidth, -500, 500, user.offsetC));
+  user.offsetC = round(uiSlider(x + sliderStart, y, sliderWidth, -2000, 2000, user.offsetC));
   user.offsetC = round(uiEditBox(user.offsetC, x + sliderStart + sliderWidth + 10, y, 60));
   y = y + 50;
 
@@ -401,11 +439,6 @@ function rr_AccelMeter:drawOptions(x, y)
   user.greenWidthL = round(uiEditBox(user.greenWidthL, x + sliderStart + sliderWidth + 10, y, 60));
   y = y + 40;
 
-  uiLabel("Alpha", x, y);
-  user.alphaL = round(uiSlider(x + sliderStart, y, sliderWidth, 0, 255, user.alphaL));
-  user.alphaL = round(uiEditBox(user.alphaL, x + sliderStart + sliderWidth + 10, y, 60));
-  y = y + 40;
-
   uiLabel("Scale", x, y);
   user.lineScaleL = round(uiSlider(x + sliderStart, y, sliderWidth, 1, 20, user.lineScaleL));
   user.lineScaleL = round(uiEditBox(user.lineScaleL, x + sliderStart + sliderWidth + 10, y, 60));
@@ -414,13 +447,57 @@ function rr_AccelMeter:drawOptions(x, y)
   uiLabel("Offset", x, y);
   user.offsetL = round(uiSlider(x + sliderStart, y, sliderWidth, -500, 500, user.offsetL));
   user.offsetL = round(uiEditBox(user.offsetL, x + sliderStart + sliderWidth + 10, y, 60));
+  y = y + 50;
+
+  uiLabel("COLOUR SETTINGS", x + 10, y);
   y = y + 40;
+
+  if uiButton("Reset Colour", nil, x, y, 150, UI_DEFAULT_BUTTON_HEIGHT, PHGPHUD_RED_COLOR) then
+    user.cBlue1 = shallowCopy(self.defaultData.cBlue1);
+    user.cBlue2 = shallowCopy(self.defaultData.cBlue2);
+    user.cGreen1 = shallowCopy(self.defaultData.cGreen1);
+    user.cGreen2 = shallowCopy(self.defaultData.cGreen2);
+  end
+  y = y + 40;
+
+  uiLabel("Blue (inside):", x + 10, y);
+  y = y + 40;
+  user.cBlue1 = uiColorPicker(x, y, user.cBlue1, {});
+  y = y + 240;
+  uiLabel("Blue (outside):", x + 10, y);
+  y = y + 40;
+  user.cBlue2 = uiColorPicker(x, y, user.cBlue2, {});
+  y = y + 240;
+  uiLabel("Green (inside):", x + 10, y);
+  y = y + 40;
+  user.cGreen2 = uiColorPicker(x, y, user.cGreen2, {});
+  y = y + 240;
+  uiLabel("Green (outside):", x + 10, y);
+  y = y + 40;
+  user.cGreen1 = uiColorPicker(x, y, user.cGreen1, {});
+  y = y + 240;
+
+  uiLabel("Preview:", x + 10, y);
+  y = y + 100;
+  nvgBeginPath()
+  nvgMoveTo(x + 50, y);
+  nvgLineTo(x + 350, y);
+  nvgStrokeLinearGradient(x + 50, 0, x + 350, 0, user.cBlue2, user.cBlue1);
+  nvgStrokeWidth(100);
+  nvgStroke();
+
+  nvgBeginPath();
+  nvgMoveTo(x + 350, y);
+  nvgLineTo(x + 450, y);
+  nvgStrokeLinearGradient(x + 350, 0, x + 450, 0, user.cGreen2, user.cGreen1);
+  nvgStrokeWidth(100);
+  nvgStroke();
 
   saveUserData(user);
 end
 
 function rr_AccelMeter:getOptionsHeight()
-	return 700; -- debug with: ui_optionsmenu_show_properties_height 1
+	return 2000; -- debug with: ui_optionsmenu_show_properties_height 1
 end
 
 function rr_AccelMeter:settings()
