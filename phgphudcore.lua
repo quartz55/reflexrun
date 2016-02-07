@@ -129,5 +129,24 @@ function shallowCopy(orig) -- http://lua-users.org/wiki/CopyTable
   return copy
 end
 
+function deepCopy(orig) -- recursive, to deal with tables in table
+  local orig_type = type(orig)
+  local copy
+
+  if orig_type == 'table' then
+    copy = {}
+    for orig_key, orig_value in pairs(orig) do
+      if type(orig_value) == 'table' then
+        orig_value = deepCopy(orig_value)
+      end
+      copy[orig_key] = orig_value
+    end
+  else -- number, string, boolean, etc
+    copy = orig
+  end
+
+  return copy
+end
+
 --------------------
 --------------------
