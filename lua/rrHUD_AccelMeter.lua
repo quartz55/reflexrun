@@ -8,18 +8,19 @@ rr_AccelMeter =
     defaultData = {
       drawAccelCircle = true;
       drawAccelLine = false;
-      drawBlueLine = true;
       latencyWorkaround = false;
       guideCircle = false;
       guideLine = false;
       invertC = false;
       blueWidthC = 50;
       greenWidthC = 50;
+      widthLockC = true;
       radiusC = 100;
       lineScaleC = 1;
       offsetC = 100;
       blueWidthL = 35;
       greenWidthL = 35;
+      widthLockL = true;
       lineScaleL = 3;
       offsetL = 0;
       cBlue1 = shallowCopy(ColorA(PHGPHUD_BLUE_COLOR, 120));
@@ -37,7 +38,6 @@ function rr_AccelMeter:initialize()
 
   CheckSetDefaultValue(self.userData, "drawAccelCircle", "boolean", self.defaultData.drawAccelCircle);
   CheckSetDefaultValue(self.userData, "drawAccelLine", "boolean", self.defaultData.drawAccelLine);
-  CheckSetDefaultValue(self.userData, "drawBlueLine", "boolean", self.defaultData.drawBlueLine);
   CheckSetDefaultValue(self.userData, "latencyWorkaround", "boolean", self.defaultData.latencyWorkaround);
 
   CheckSetDefaultValue(self.userData, "guideCircle", "boolean", self.defaultData.guideCircle);
@@ -46,12 +46,14 @@ function rr_AccelMeter:initialize()
   
   CheckSetDefaultValue(self.userData, "blueWidthC", "number", self.defaultData.blueWidthC);
   CheckSetDefaultValue(self.userData, "greenWidthC", "number", self.defaultData.greenWidthC);
+  CheckSetDefaultValue(self.userData, "widthLockC", "boolean", self.defaultData.widthLockC);
   CheckSetDefaultValue(self.userData, "radiusC", "number", self.defaultData.radiusC);
   CheckSetDefaultValue(self.userData, "lineScaleC", "number", self.defaultData.lineScaleC);
   CheckSetDefaultValue(self.userData, "offsetC", "number", self.defaultData.offsetC);
 
   CheckSetDefaultValue(self.userData, "blueWidthL", "number", self.defaultData.blueWidthL);
   CheckSetDefaultValue(self.userData, "greenWidthL", "number", self.defaultData.greenWidthL);
+  CheckSetDefaultValue(self.userData, "widthLockL", "boolean", self.defaultData.widthLockL);
   CheckSetDefaultValue(self.userData, "lineScaleL", "number", self.defaultData.lineScaleL);
   CheckSetDefaultValue(self.userData, "offsetL", "number", self.defaultData.offsetL);
 
@@ -59,6 +61,12 @@ function rr_AccelMeter:initialize()
   CheckSetDefaultValue(self.userData, "cBlue2", "table", shallowCopy(self.defaultData.cBlue2));
   CheckSetDefaultValue(self.userData, "cGreen1", "table", shallowCopy(self.defaultData.cGreen1));
   CheckSetDefaultValue(self.userData, "cGreen2", "table", shallowCopy(self.defaultData.cGreen2));
+
+  -- needed for ColorPicker widget popup
+  widgetCreateConsoleVariable("cBlue1", "string", argbToHex(self.defaultData.cBlue1));
+  widgetCreateConsoleVariable("cBlue2", "string", argbToHex(self.defaultData.cBlue2));
+  widgetCreateConsoleVariable("cGreen1", "string", argbToHex(self.defaultData.cGreen1));
+  widgetCreateConsoleVariable("cGreen2", "string", argbToHex(self.defaultData.cGreen2));
 end
 
 -------------------------------------------------------------------------
@@ -127,7 +135,7 @@ function rr_AccelMeter:drawAC(ang_diff_min, ang_diff_op, ang_diff_op_m, dir)
     nvgArc(0, self.userData.offsetC, self.userData.radiusC, ang_diff_min-math.pi/2, ang_diff_op-math.pi/2, dir)
     nvgStrokeLinearGradient(colourB_X1, colourB_Y1, colourB_X2, colourB_Y2, self.userData.cBlue2, self.userData.cBlue1)
     nvgStrokeWidth(self.userData.blueWidthC)
-    if self.userData.drawBlueLine then nvgStroke() end
+    nvgStroke()
 
     nvgBeginPath()
     nvgArc(0, self.userData.offsetC, self.userData.radiusC, ang_diff_op_m-math.pi/2, ang_diff_op-math.pi/2, dir)
@@ -144,7 +152,7 @@ function rr_AccelMeter:drawAL(cgazB1, cgazB2, cgazG1, cgazG2)
     nvgLineTo(cgazB2, self.userData.offsetL)
     nvgStrokeLinearGradient(cgazB1, 0, cgazB2, 0, self.userData.cBlue2, self.userData.cBlue1)
     nvgStrokeWidth(self.userData.blueWidthL)
-    if self.userData.drawBlueLine then nvgStroke() end
+    nvgStroke()
 
     nvgBeginPath()
     nvgMoveTo(cgazG1, self.userData.offsetL)
@@ -373,131 +381,177 @@ function rr_AccelMeter:draw()
 end
 
 function rr_AccelMeter:drawOptions(x, y)
-  local sliderWidth = 200;
+  local colIndent = 200;
+  local sliderWidth = 480;
   local sliderStart = 140;
+  local editBoxWidth = 70;
+  local optargs = {};
 
-  if uiButton("Reset Settings", nil, x + 250, y - 5, 150, UI_DEFAULT_BUTTON_HEIGHT, PHGPHUD_RED_COLOR) then
+  if ui2Button("RESET ALL SETTINGS", x, y + 210, 220, UI_DEFAULT_BUTTON_HEIGHT) then
     self.userData = {};
     self.userData = deepCopy(self.defaultData);
+
+    consolePerformCommand("ui_rr_accelmeter_cBlue1 " .. argbToHex(self.defaultData.cBlue1));
+    consolePerformCommand("ui_rr_accelmeter_cBlue2 " .. argbToHex(self.defaultData.cBlue2));
+    consolePerformCommand("ui_rr_accelmeter_cGreen1 " .. argbToHex(self.defaultData.cGreen1));
+    consolePerformCommand("ui_rr_accelmeter_cGreen2 " .. argbToHex(self.defaultData.cGreen2));
   end
 
   local user = self.userData;
 
-  uiLabel("DRAW ACCELMETER AS", x + 10, y);
-  y = y + 35;
-
-  user.drawAccelCircle = uiCheckBox(user.drawAccelCircle, "Circle", x, y);
-  user.drawAccelLine = uiCheckBox(user.drawAccelLine, "Line", x + 100, y);
-  user.drawBlueLine = uiCheckBox(user.drawBlueLine, "With Blue Area", x + 220, y);
-  y = y + 35;
-  user.latencyWorkaround = uiCheckBox(user.latencyWorkaround, "High Ping Fix", x, y);
+  ui2Label("DRAW ACCELMETER AS", x + 10, y);
   y = y + 50;
 
-  uiLabel("SETTINGS FOR CIRCULAR ACCELMETER", x + 10, y);
-  y = y + 35;
+  ui2Label("Circle", x, y);
+  user.drawAccelCircle = ui2CheckBox(user.drawAccelCircle, x + colIndent, y);
+  y = y + 50;
+  ui2Label("Line", x, y);
+  user.drawAccelLine = ui2CheckBox(user.drawAccelLine, x + colIndent, y);
+  y = y + 50;
+  ui2Label("High Ping Fix", x, y);
+  user.latencyWorkaround = ui2CheckBox(user.latencyWorkaround, x + colIndent, y);
+  y = y + 140;
 
-  user.guideCircle = uiCheckBox(user.guideCircle, "Guide Arc", x, y);
-  user.guideLine = uiCheckBox(user.guideLine, "Guide Line", x + 140, y);
-  user.invertC = uiCheckBox(user.invertC, "Invert", x + 300, y);
-  y = y + 40;
-
-  uiLabel("Blue Width", x, y);
-  user.blueWidthC = round(uiSlider(x + sliderStart, y, sliderWidth, 10, 200, user.blueWidthC));
-  user.blueWidthC = round(uiEditBox(user.blueWidthC, x + sliderStart + sliderWidth + 10, y, 60));
-  y = y + 40;
-
-  uiLabel("Green Width", x, y);
-  user.greenWidthC = round(uiSlider(x + sliderStart, y, sliderWidth, 10, 200, user.greenWidthC));
-  user.greenWidthC = round(uiEditBox(user.greenWidthC, x + sliderStart + sliderWidth + 10, y, 60));
-  y = y + 40;
-
-  uiLabel("Radius", x, y);
-  user.radiusC = round(uiSlider(x + sliderStart, y, sliderWidth, 1, 1000, user.radiusC));
-  user.radiusC = round(uiEditBox(user.radiusC, x + sliderStart + sliderWidth + 10, y, 60));
-  y = y + 40;
-
-  uiLabel("Scale", x, y);
-  user.lineScaleC = round(uiSlider(x + sliderStart, y, sliderWidth, 1, 12, user.lineScaleC));
-  user.lineScaleC = round(uiEditBox(user.lineScaleC, x + sliderStart + sliderWidth + 10, y, 60));
-  y = y + 40;
-
-  uiLabel("Offset", x, y);
-  user.offsetC = round(uiSlider(x + sliderStart, y, sliderWidth, -2000, 2000, user.offsetC));
-  user.offsetC = round(uiEditBox(user.offsetC, x + sliderStart + sliderWidth + 10, y, 60));
+  ui2Label("SETTINGS FOR CIRCULAR ACCELMETER", x + 10, y);
   y = y + 50;
 
-  uiLabel("SETTINGS FOR LINE ACCELMETER", x + 10, y);
-  y = y + 35;
-
-  uiLabel("Blue Width", x, y);
-  user.blueWidthL = round(uiSlider(x + sliderStart, y, sliderWidth, 10, 200, user.blueWidthL));
-  user.blueWidthL = round(uiEditBox(user.blueWidthL, x + sliderStart + sliderWidth + 10, y, 60));
-  y = y + 40;
-
-  uiLabel("Green Width", x, y);
-  user.greenWidthL = round(uiSlider(x + sliderStart, y, sliderWidth, 10, 200, user.greenWidthL));
-  user.greenWidthL = round(uiEditBox(user.greenWidthL, x + sliderStart + sliderWidth + 10, y, 60));
-  y = y + 40;
-
-  uiLabel("Scale", x, y);
-  user.lineScaleL = round(uiSlider(x + sliderStart, y, sliderWidth, 1, 20, user.lineScaleL));
-  user.lineScaleL = round(uiEditBox(user.lineScaleL, x + sliderStart + sliderWidth + 10, y, 60));
-  y = y + 40;
-
-  uiLabel("Offset", x, y);
-  user.offsetL = round(uiSlider(x + sliderStart, y, sliderWidth, -500, 500, user.offsetL));
-  user.offsetL = round(uiEditBox(user.offsetL, x + sliderStart + sliderWidth + 10, y, 60));
+  ui2Label("Guide Arc", x, y);
+  user.guideCircle = ui2CheckBox(user.guideCircle, x + colIndent, y);
+  y = y + 50;
+  ui2Label("Guide Line", x, y);
+  user.guideLine = ui2CheckBox(user.guideLine, x + colIndent, y);
+  y = y + 50;
+  ui2Label("Invert", x, y);
+  user.invertC = ui2CheckBox(user.invertC, x + colIndent, y);
   y = y + 50;
 
-  uiLabel("COLOUR SETTINGS", x + 10, y);
-  y = y + 40;
+  user.widthLockC = ui2CheckBox(user.widthLockC, x + 500, y + 25);
+  if user.widthLockC then
+    -- lock the values together
+    user.blueWidthC = ui2RowSliderEditBox0Decimals(x, y, sliderStart, sliderWidth, editBoxWidth, "Blue Width", user.blueWidthC, 10, 200);
+    user.greenWidthC = user.blueWidthC;
+    y = y + 50;
+    user.greenWidthC = ui2RowSliderEditBox0Decimals(x, y, sliderStart, sliderWidth, editBoxWidth, "Green Width", user.greenWidthC, 10, 200);
+    user.blueWidthC = user.greenWidthC;
+    y = y + 50;
+  else
+    user.blueWidthC = ui2RowSliderEditBox0Decimals(x, y, sliderStart, sliderWidth, editBoxWidth, "Blue Width", user.blueWidthC, 10, 200);
+    y = y + 50;
+    user.greenWidthC = ui2RowSliderEditBox0Decimals(x, y, sliderStart, sliderWidth, editBoxWidth, "Green Width", user.greenWidthC, 10, 200);
+    y = y + 50;
+  end
+  user.radiusC = ui2RowSliderEditBox0Decimals(x, y, sliderStart, sliderWidth, editBoxWidth, "Radius", user.radiusC, 1, 1000);
+  y = y + 50;
+  user.lineScaleC = ui2RowSliderEditBox0Decimals(x, y, sliderStart, sliderWidth, editBoxWidth, "Scale", user.lineScaleC, 1, 12);
+  y = y + 50;
+  user.offsetC = ui2RowSliderEditBox0Decimals(x, y, sliderStart, sliderWidth, editBoxWidth, "Offset", user.offsetC, -2000, 2000);
+  y = y + 70;
 
-  if uiButton("Reset Colour", nil, x, y, 150, UI_DEFAULT_BUTTON_HEIGHT, PHGPHUD_RED_COLOR) then
+  ui2Label("SETTINGS FOR LINE ACCELMETER", x + 10, y);
+  y = y + 50;
+
+  user.widthLockL = ui2CheckBox(user.widthLockL, x + 500, y + 25);
+  if user.widthLockL then
+    -- lock the values together
+    user.blueWidthL = ui2RowSliderEditBox0Decimals(x, y, sliderStart, sliderWidth, editBoxWidth, "Blue Width", user.blueWidthL, 10, 200);
+    user.greenWidthL = user.blueWidthL;
+    y = y + 50;
+    user.greenWidthL = ui2RowSliderEditBox0Decimals(x, y, sliderStart, sliderWidth, editBoxWidth, "Green Width", user.greenWidthL, 10, 200);
+    user.blueWidthL = user.greenWidthL;
+    y = y + 50;
+  else
+    user.blueWidthL = ui2RowSliderEditBox0Decimals(x, y, sliderStart, sliderWidth, editBoxWidth, "Blue Width", user.blueWidthL, 10, 200);
+    y = y + 50;
+    user.greenWidthL = ui2RowSliderEditBox0Decimals(x, y, sliderStart, sliderWidth, editBoxWidth, "Green Width", user.greenWidthL, 10, 200);
+    y = y + 50;
+  end
+  user.lineScaleL = ui2RowSliderEditBox0Decimals(x, y, sliderStart, sliderWidth, editBoxWidth, "Scale", user.lineScaleL, 1, 20);
+  y = y + 50;
+  user.offsetL = ui2RowSliderEditBox0Decimals(x, y, sliderStart, sliderWidth, editBoxWidth, "Offset", user.offsetL, -500, 500);
+  y = y + 70;
+
+  ui2Label("COLOUR SETTINGS", x + 10, y);
+  y = y + 45;
+
+  optargs.texttype = "color";
+  optargs.bgcoltype = UI2_COLTYPE_BUTTON_BLACK;
+
+  if ui2Button("RESET COLOUR", x, y + 360, 180, UI_DEFAULT_BUTTON_HEIGHT) then
     user.cBlue1 = shallowCopy(self.defaultData.cBlue1);
     user.cBlue2 = shallowCopy(self.defaultData.cBlue2);
     user.cGreen1 = shallowCopy(self.defaultData.cGreen1);
     user.cGreen2 = shallowCopy(self.defaultData.cGreen2);
+
+    consolePerformCommand("ui_rr_accelmeter_cBlue1 " .. argbToHex(self.defaultData.cBlue1));
+    consolePerformCommand("ui_rr_accelmeter_cBlue2 " .. argbToHex(self.defaultData.cBlue2));
+    consolePerformCommand("ui_rr_accelmeter_cGreen1 " .. argbToHex(self.defaultData.cGreen1));
+    consolePerformCommand("ui_rr_accelmeter_cGreen2 " .. argbToHex(self.defaultData.cGreen2));
+  end
+
+  ui2Label("Blue", x + 20, y + 55);
+  ui2Label("Inside", x + 110, y);
+  ui2Label("Outside", x + 245, y);
+  y = y + 40;
+
+  -- draw a neat box around the colour buttons
+  nvgBeginPath();
+  nvgStrokeColor(UI2_COLTYPE_TEXT_GREY.base);
+  nvgStrokeWidth(4);
+  nvgRoundedRect(x + 5, y, 370, 70, 5);
+  nvgStroke();
+
+  if ui2Button(user.cBlue1, x + 90, y + 10, 120, 50, optargs) then
+    showAsPopup("ColorPicker", argbToHex(user.cBlue1), "", "ui_rr_accelmeter_cBlue1 %s");
+  end
+  if ui2Button(user.cBlue2, x + 230, y + 10, 120, 50, optargs) then
+    showAsPopup("ColorPicker", argbToHex(user.cBlue2), "", "ui_rr_accelmeter_cBlue2 %s");
   end
   y = y + 40;
 
-  uiLabel("Blue (inside):", x + 10, y);
+  ui2Label("Green", x + 20, y + 55);
   y = y + 40;
-  user.cBlue1 = uiColorPicker(x, y, user.cBlue1, {});
-  y = y + 240;
-  uiLabel("Blue (outside):", x + 10, y);
-  y = y + 40;
-  user.cBlue2 = uiColorPicker(x, y, user.cBlue2, {});
-  y = y + 240;
-  uiLabel("Green (inside):", x + 10, y);
-  y = y + 40;
-  user.cGreen2 = uiColorPicker(x, y, user.cGreen2, {});
-  y = y + 240;
-  uiLabel("Green (outside):", x + 10, y);
-  y = y + 40;
-  user.cGreen1 = uiColorPicker(x, y, user.cGreen1, {});
-  y = y + 240;
 
-  uiLabel("Preview:", x + 10, y);
-  y = y + 100;
+  -- draw a neat box around the colour buttons
+  nvgBeginPath();
+  nvgStrokeColor(UI2_COLTYPE_TEXT_GREY.base);
+  nvgStrokeWidth(4);
+  nvgRoundedRect(x + 5, y, 370, 70, 5);
+  nvgStroke();
+
+  if ui2Button(user.cGreen2, x + 90, y + 10, 120, 50, optargs) then
+    showAsPopup("ColorPicker", argbToHex(user.cGreen2), "", "ui_rr_accelmeter_cGreen2 %s");
+  end
+  if ui2Button(user.cGreen1, x + 230, y + 10, 120, 50, optargs) then
+    showAsPopup("ColorPicker", argbToHex(user.cGreen1), "", "ui_rr_accelmeter_cGreen1 %s");
+  end
+  y = y + 90;
+
+  user.cBlue1 = hexArgbToCol(consoleGetVariable("ui_rr_accelmeter_cBlue1"));
+  user.cBlue2 = hexArgbToCol(consoleGetVariable("ui_rr_accelmeter_cBlue2"));
+  user.cGreen1 = hexArgbToCol(consoleGetVariable("ui_rr_accelmeter_cGreen1"));
+  user.cGreen2 = hexArgbToCol(consoleGetVariable("ui_rr_accelmeter_cGreen2"));
+
+  ui2Label("Preview", x + 110, y);
+  y = y + 80;
   nvgBeginPath()
   nvgMoveTo(x + 50, y);
   nvgLineTo(x + 350, y);
   nvgStrokeLinearGradient(x + 50, 0, x + 350, 0, user.cBlue2, user.cBlue1);
-  nvgStrokeWidth(100);
+  nvgStrokeWidth(80);
   nvgStroke();
 
   nvgBeginPath();
   nvgMoveTo(x + 350, y);
   nvgLineTo(x + 450, y);
   nvgStrokeLinearGradient(x + 350, 0, x + 450, 0, user.cGreen2, user.cGreen1);
-  nvgStrokeWidth(100);
+  nvgStrokeWidth(80);
   nvgStroke();
 
   saveUserData(user);
 end
 
 function rr_AccelMeter:getOptionsHeight()
-	return 2000; -- debug with: ui_optionsmenu_show_properties_height 1
+	return 1500; -- debug with: ui_optionsmenu_show_properties_height 1
 end
 
 function rr_AccelMeter:settings()
